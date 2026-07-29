@@ -1,0 +1,10 @@
+Olá *%nomeresumido%!*
+
+Em atendimento à Lei Geral de Proteção de Dados (LGPD) e às recentes resoluções da ANATEL, tornou-se necessário revisar e atualizar o contrato de serviço de internet para novos e antigos clientes.
+
+Por favor acese a url abaixo, leia todas as cláusulas e, se estiver de acordo, assine incluindo uma selfie com o documento de identidade próximo ao rosto.
+
+https://dominio_provedor.com.br/contrato?cpf_cnpj=%cpfcliente%
+
+Obrigado pela atenção.
+*Provedor Telecom*

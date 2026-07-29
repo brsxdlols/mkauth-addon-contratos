@@ -1,0 +1,191 @@
+/* ================================
+   Reset básico para garantir consistência em navegadores
+================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ================================
+   Estilo Geral
+================================ */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #e6e3e6;
+}
+
+/* ================================
+   Estilização do Formulário
+================================ */
+.form-container {
+    max-width: 400px;
+    width: 100%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 18px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* ================================
+   Estilo do Logo
+================================ */
+.logo {
+    width: 170px;
+    margin-bottom: 15px;
+}
+
+/* ================================
+   Título Explicativo
+================================ */
+.explanation {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+h3 {
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+/* ================================
+   Estilo dos Inputs
+================================ */
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+/* ================================
+   Estilo do Botão
+================================ */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* ================================
+   Texto de Contato
+================================ */
+.contact-info {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: 0.8em;
+    color: #818181;
+    line-height: 1.3em;
+}
+
+/* ================================
+   Estilização da Tela de Boas-vindas
+================================ */
+.welcome-container {
+    max-width: 400px;
+    width: 100%;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.welcome-message {
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Reutiliza a classe explanation para a explicação na tela de boas-vindas */
+.explanation {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+/* Botão específico para confirmação */
+button.confirm-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+}
+
+button.confirm-button:hover {
+    background-color: #45a049;
+}
+
+/* ================================
+   Mobile
+================================ */
+@media (max-width: 600px) {
+    h3, .welcome-message {
+        font-size: 1.3em;
+    }
+
+    input[type="text"],
+    button {
+        font-size: 0.9em;
+    }
+
+    .explanation {
+        font-size: 0.8em;
+    }
+}
+
+/* ================================
+   Estilo da Imagem de Instruções
+================================ */
+.instruction-image {
+    max-width: 60%; /* Garante que a imagem seja responsiva */
+    height: auto; /* Mantém a proporção da imagem */
+    margin: 15px 0; /* Espaço acima e abaixo da imagem */
+    border-radius: 8px; /* Bordas arredondadas para suavizar */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para destaque */
+}
+
+.welcome-message {
+    font-size: 1.4em; /* Tamanho do texto de boas-vindas */
+    color: #333; /* Cor do texto de boas-vindas */
+    text-align: center; /* Centraliza o texto */
+    margin-bottom: 20px; /* Espaço abaixo do texto */
+}
+
+/* Texto de Explicação Justificado */
+.explanation {
+    text-align: justify; /* Justifica o texto */
+    font-size: 1em; /* Tamanho da fonte */
+    color: #555; /* Cor do texto */
+    line-height: 1.2; /* Altura da linha para melhor leitura */
+    margin-bottom: 15px; /* Espaço entre os parágrafos */
+}

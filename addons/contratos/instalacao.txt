@@ -1,0 +1,5 @@
+//Adicione esta parte no seu arquivo addon.js:
+
+/** Updata */
+const updata = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '') + "/admin/addons/";
+add_menu.clientes(`{ "plink": "${updata}contratos", "ptext": "Controle de Contratos"}`)

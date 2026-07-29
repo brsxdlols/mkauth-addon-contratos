@@ -1,0 +1,290 @@
+/* Estilos para a tela de diagnóstico AppArmor */
+
+.diagnostico-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.diagnostico-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #e74c3c;
+}
+
+.diagnostico-header i {
+    font-size: 64px;
+    color: #e74c3c;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.diagnostico-header h1 {
+    color: #2c3e50;
+    font-size: 28px;
+    margin: 0 0 0.5rem 0;
+}
+
+.diagnostico-header p {
+    color: #7f8c8d;
+    font-size: 16px;
+    margin: 0;
+}
+
+.diagnostico-status {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 8px;
+}
+
+.diagnostico-status.erro {
+    background: #f8d7da;
+    border-left-color: #e74c3c;
+}
+
+.diagnostico-status.sucesso {
+    background: #d4edda;
+    border-left-color: #28a745;
+}
+
+.diagnostico-status h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 20px;
+    color: #2c3e50;
+}
+
+.diagnostico-status p {
+    margin: 0;
+    color: #495057;
+    font-size: 16px;
+}
+
+.diagnostico-detalhes {
+    margin: 2rem 0;
+}
+
+.diagnostico-detalhes h3 {
+    color: #2c3e50;
+    font-size: 18px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.diagnostico-detalhes ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.diagnostico-detalhes li {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.diagnostico-detalhes li:before {
+    content: '▸';
+    color: #0082BC;
+    font-weight: bold;
+}
+
+.diagnostico-comando {
+    margin: 2rem 0;
+}
+
+.diagnostico-comando h3 {
+    color: #2c3e50;
+    font-size: 18px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.diagnostico-comando h3 i {
+    color: #e74c3c;
+}
+
+.comando-box {
+    position: relative;
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.comando-box:before {
+    content: '$ ';
+    color: #3498db;
+    font-weight: bold;
+}
+
+.btn-copiar {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-copiar:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.btn-copiar.copiado {
+    background: #28a745;
+}
+
+.diagnostico-instrucoes {
+    background: #e8f4f8;
+    border-left: 4px solid #0082BC;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 8px;
+}
+
+.diagnostico-instrucoes h4 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.diagnostico-instrucoes ol {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.diagnostico-instrucoes li {
+    margin-bottom: 0.75rem;
+    color: #495057;
+    line-height: 1.6;
+}
+
+.diagnostico-acoes {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.btn-action {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-recarregar {
+    background: #0082BC;
+    color: white;
+}
+
+.btn-recarregar:hover {
+    background: #006ba1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 130, 188, 0.3);
+}
+
+.btn-voltar {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-voltar:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.diagnostico-sucesso-icon {
+    color: #28a745 !important;
+}
+
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .diagnostico-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .diagnostico-header h1 {
+        font-size: 22px;
+    }
+    
+    .comando-box {
+        font-size: 11px;
+        padding: 1rem;
+    }
+    
+    .btn-copiar {
+        position: static;
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .diagnostico-acoes {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
