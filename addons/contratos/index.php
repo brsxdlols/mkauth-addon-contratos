@@ -19,6 +19,17 @@ if (!$diagnostico['ok']) {
 
 // Incluir dados do index
 include 'functions/dados_index.php';
+
+// Token e status do upload da assinatura do provedor
+if (empty($_SESSION['contratos_assinatura_csrf'])) {
+    $_SESSION['contratos_assinatura_csrf'] = bin2hex(random_bytes(32));
+}
+
+$assinaturaProvedorPath = '/opt/mk-auth/mkfiles/assinatura_provedor';
+$assinaturaProvedorExiste = is_file($assinaturaProvedorPath);
+$assinaturaProvedorVersao = $assinaturaProvedorExiste ? (string) filemtime($assinaturaProvedorPath) : '';
+$assinaturaFlash = $_SESSION['contratos_assinatura_flash'] ?? null;
+unset($_SESSION['contratos_assinatura_flash']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" class="has-navbar-fixed-top">
@@ -112,6 +123,13 @@ include 'functions/dados_index.php';
     </div>
 
     <div class="conteiner">
+        <?php if (is_array($assinaturaFlash) && !empty($assinaturaFlash['message'])): ?>
+            <div class="signature-flash signature-flash-<?= ($assinaturaFlash['type'] ?? '') === 'success' ? 'success' : 'error' ?>">
+                <i class="<?= ($assinaturaFlash['type'] ?? '') === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill' ?>"></i>
+                <span><?= htmlspecialchars($assinaturaFlash['message'], ENT_QUOTES, 'UTF-8') ?></span>
+            </div>
+        <?php endif; ?>
+
         <div class="actions-bar">
             <div class="filter-container">
                 <label for="filterSelect">Filtrar por:</label>
@@ -127,6 +145,47 @@ include 'functions/dados_index.php';
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Buscar cliente pelo nome..." onkeyup="filterTable()">
             </div>
+
+            <form
+                id="signatureUploadForm"
+                class="signature-upload-container"
+                action="upload_assinatura_provedor.php"
+                method="post"
+                enctype="multipart/form-data"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars($_SESSION['contratos_assinatura_csrf'], ENT_QUOTES, 'UTF-8') ?>"
+                >
+                <input
+                    type="file"
+                    id="signatureFileInput"
+                    name="assinatura_provedor"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    hidden
+                    onchange="enviarAssinaturaProvedor(this)"
+                >
+                <button
+                    type="button"
+                    id="signatureUploadButton"
+                    class="signature-upload-btn"
+                    onclick="selecionarAssinaturaProvedor()"
+                    title="Enviar a imagem usada como assinatura do provedor nos contratos"
+                >
+                    <?php if ($assinaturaProvedorExiste): ?>
+                        <span class="signature-preview">
+                            <img
+                                src="/mkfiles/assinatura_provedor?v=<?= urlencode($assinaturaProvedorVersao) ?>"
+                                alt="Assinatura atual"
+                            >
+                        </span>
+                    <?php else: ?>
+                        <i class="bi-image"></i>
+                    <?php endif; ?>
+                    <span><?= $assinaturaProvedorExiste ? 'Atualizar Assinatura' : 'Enviar Assinatura' ?></span>
+                </button>
+            </form>
 
             <div class="backup-container">
                 <button class="backup-btn" onclick="fazerBackupContratos()" title="Abrir página para baixar todos os contratos">

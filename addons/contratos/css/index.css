@@ -522,7 +522,7 @@ tbody tr:hover {
 /* ==================== BARRA DE AÇÕES ==================== */
 .actions-bar {
     display: grid;
-    grid-template-columns: 1fr 2fr auto;
+    grid-template-columns: 1fr minmax(280px, 2fr) auto auto;
     gap: 15px;
     align-items: stretch;
     margin-bottom: 20px;
@@ -556,7 +556,14 @@ tbody tr:hover {
     align-items: center;
 }
 
-.backup-btn {
+.signature-upload-container {
+    display: flex;
+    align-items: stretch;
+    margin: 0;
+}
+
+.backup-btn,
+.signature-upload-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -576,27 +583,36 @@ tbody tr:hover {
     width: 100%;
 }
 
-.backup-btn:hover {
+.signature-upload-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.backup-btn:hover,
+.signature-upload-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px var(--shadow-color);
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
 }
 
-.backup-btn:active {
+.backup-btn:active,
+.signature-upload-btn:active {
     transform: translateY(0);
 }
 
-.backup-btn i {
+.backup-btn i,
+.signature-upload-btn i {
     font-size: 18px;
 }
 
-.backup-btn.loading {
+.backup-btn.loading,
+.signature-upload-btn.loading {
     opacity: 0.7;
     cursor: not-allowed;
     pointer-events: none;
 }
 
-.backup-btn.loading::after {
+.backup-btn.loading::after,
+.signature-upload-btn.loading::after {
     content: '';
     display: inline-block;
     width: 14px;
@@ -608,6 +624,45 @@ tbody tr:hover {
     margin-left: 8px;
 }
 
+.signature-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 30px;
+    padding: 3px;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.signature-preview img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.signature-flash {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 12px var(--shadow-color);
+}
+
+.signature-flash-success {
+    background: linear-gradient(135deg, #20bf6b 0%, #0fb9b1 100%);
+}
+
+.signature-flash-error {
+    background: linear-gradient(135deg, #eb3b5a 0%, #fa8231 100%);
+}
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
@@ -615,7 +670,7 @@ tbody tr:hover {
 /* Responsividade da barra de ações */
 @media (max-width: 1200px) {
     .actions-bar {
-        grid-template-columns: 1fr 1.5fr auto;
+        grid-template-columns: 1fr 1.5fr;
         gap: 12px;
     }
 }
@@ -628,11 +683,13 @@ tbody tr:hover {
     
     .filter-container,
     .search-container,
+    .signature-upload-container,
     .backup-container {
         width: 100%;
     }
     
-    .backup-btn {
+    .backup-btn,
+    .signature-upload-btn {
         justify-content: center;
         padding: 14px 20px;
     }
@@ -647,11 +704,13 @@ tbody tr:hover {
         font-size: 13px;
     }
     
-    .backup-btn {
+    .backup-btn,
+    .signature-upload-btn {
         font-size: 13px;
     }
     
-    .backup-btn i {
+    .backup-btn i,
+    .signature-upload-btn i {
         font-size: 16px;
     }
 }

@@ -7,6 +7,9 @@ Instalador automatizado do addon de assinatura e controle de contratos para MK A
 - instala o addon em `/opt/mk-auth/admin/addons/contratos`;
 - registra o atalho **Contratos Assinados** no menu **Clientes**;
 - cria o diretório de PDFs em `/opt/mk-auth/admin/arquivos`;
+- permite enviar ou trocar a assinatura do provedor diretamente pela barra de ações do addon;
+- valida PNG, JPG, WEBP e GIF de até 5 MB e salva a imagem em `/opt/mk-auth/mkfiles/assinatura_provedor`, sem extensão;
+- mantém até 20 backups das assinaturas anteriores em `/var/backups/mkauth-addon-contratos-assinaturas`;
 - cria ou atualiza, sem duplicar, estes dois contratos nativos do MK Auth:
   - **CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO**
   - **CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET**
@@ -23,7 +26,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.0.0`.
+O instalador remoto usa por padrão a versão estável `v1.1.0`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 
@@ -57,13 +60,13 @@ O comando de instalação é idempotente e pode ser executado novamente. Ele atu
 Cada execução mostra o caminho do backup criado, por exemplo:
 
 ```text
-/root/backups/mkauth-addon-contratos-20260728-220000-v1.0.0
+/root/backups/mkauth-addon-contratos-20260728-220000-v1.1.0
 ```
 
 Para restaurar:
 
 ```sh
-sh installers/rollback.sh /root/backups/mkauth-addon-contratos-20260728-220000-v1.0.0
+sh installers/rollback.sh /root/backups/mkauth-addon-contratos-20260728-220000-v1.1.0
 ```
 
 No checkout não estando mais disponível, baixe o script da mesma versão antes de executar o rollback.

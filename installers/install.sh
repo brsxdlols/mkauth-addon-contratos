@@ -8,6 +8,8 @@ ADDONS_DIR="$MKAUTH_ROOT/admin/addons"
 SOURCE_DIR="$REPOSITORY_DIR/addons/contratos"
 TARGET_DIR="$ADDONS_DIR/contratos"
 STORAGE_DIR="$MKAUTH_ROOT/admin/arquivos"
+SIGNATURE_DIR="$MKAUTH_ROOT/mkfiles"
+SIGNATURE_BACKUP_DIR=${CONTRATOS_SIGNATURE_BACKUP_DIR:-/var/backups/mkauth-addon-contratos-assinaturas}
 BACKUP_ROOT=${CONTRATOS_BACKUP_ROOT:-/root/backups}
 VERSION=$(tr -d '\r\n' < "$REPOSITORY_DIR/VERSION")
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -143,10 +145,14 @@ chmod 0644 "$ADDON_JS"
 log "criando ou atualizando os dois contratos iniciais"
 php "$SCRIPT_DIR/seed-contracts.php" "$TARGET_DIR"
 
-log "ajustando diretorio de PDFs"
+log "ajustando diretorios de PDFs e da assinatura"
 mkdir -p "$STORAGE_DIR"
 chown www-data:www-data "$STORAGE_DIR"
 chmod 0777 "$STORAGE_DIR"
+mkdir -p "$SIGNATURE_DIR" "$SIGNATURE_BACKUP_DIR"
+chown www-data:www-data "$SIGNATURE_BACKUP_DIR"
+chmod 0777 "$SIGNATURE_DIR"
+chmod 0700 "$SIGNATURE_BACKUP_DIR"
 
 CONTRACT_COUNT=$(mysql --default-character-set=utf8 -uroot -p"${MKAUTH_DB_PASSWORD:-vertrigo}" -N -B mkradius -e "
 SELECT COUNT(DISTINCT nome)
@@ -159,6 +165,8 @@ WHERE nome IN (
 [ "$CONTRACT_COUNT" -eq 2 ] || fail "validacao do banco falhou: esperado 2, encontrado $CONTRACT_COUNT"
 grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$ADDON_JS" || fail "atalho do menu nao foi gravado"
 [ -f "$TARGET_DIR/index.php" ] || fail "arquivo principal do addon nao foi instalado"
+[ -f "$TARGET_DIR/upload_assinatura_provedor.php" ] || fail "upload da assinatura nao foi instalado"
+[ -w "$SIGNATURE_BACKUP_DIR" ] || fail "diretorio de backup da assinatura sem permissao de escrita"
 
 ln -sfn "$BACKUP_DIR" "$BACKUP_ROOT/mkauth-addon-contratos-latest"
 SUCCESS=1

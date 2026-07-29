@@ -25,5 +25,11 @@ done
 grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$REPOSITORY_DIR/installers/update-addon-js.php"
 grep -q 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO' \
     "$REPOSITORY_DIR/installers/seed-contracts.php"
+grep -q "/opt/mk-auth/mkfiles" \
+    "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
+grep -q "assinatura_provedor" \
+    "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
+grep -q 'contratos_assinatura_csrf' \
+    "$REPOSITORY_DIR/addons/contratos/index.php"
 
 echo "Validacao concluida com sucesso."

@@ -132,6 +132,52 @@ function escapeHtml(text) {
 
 // Função para fazer backup de todos os contratos
 function fazerBackupContratos() {
-    // Abrir página de download na mesma aba
     window.location.href = 'backup_contratos.php';
+}
+
+// Selecionar e enviar a assinatura do provedor
+function selecionarAssinaturaProvedor() {
+    const input = document.getElementById('signatureFileInput');
+    if (input) {
+        input.click();
+    }
+}
+
+function enviarAssinaturaProvedor(input) {
+    if (!input || !input.files || input.files.length === 0) {
+        return;
+    }
+
+    const file = input.files[0];
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+    const maximumSize = 5 * 1024 * 1024;
+
+    if (!allowedTypes.includes(file.type)) {
+        alert('Formato não permitido. Use PNG, JPG, WEBP ou GIF.');
+        input.value = '';
+        return;
+    }
+
+    if (file.size <= 0 || file.size > maximumSize) {
+        alert('A imagem deve ter no máximo 5 MB.');
+        input.value = '';
+        return;
+    }
+
+    if (!confirm(`Usar "${file.name}" como assinatura do provedor?`)) {
+        input.value = '';
+        return;
+    }
+
+    const form = document.getElementById('signatureUploadForm');
+    const button = document.getElementById('signatureUploadButton');
+    if (!form || !button) {
+        alert('Não foi possível preparar o envio da assinatura.');
+        return;
+    }
+
+    button.classList.add('loading');
+    button.disabled = true;
+    button.querySelector('span:last-child').textContent = 'Enviando...';
+    form.submit();
 }
