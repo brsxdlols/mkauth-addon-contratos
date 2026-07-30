@@ -2,7 +2,7 @@
 set -eu
 
 REPOSITORY=${CONTRATOS_REPOSITORY:-brsxdlols/mkauth-addon-contratos}
-REF=${CONTRATOS_REF:-v1.1.1}
+REF=${CONTRATOS_REF:-v1.2.0}
 TEMP_DIR=$(mktemp -d)
 
 cleanup() {

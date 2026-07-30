@@ -164,7 +164,7 @@ function enviarAssinaturaProvedor(input) {
         return;
     }
 
-    if (!confirm(`Usar "${file.name}" como assinatura do provedor?`)) {
+    if (!confirm(`Usar "${file.name}" como assinatura do provedor? A imagem será convertida para fundo branco e traços pretos.`)) {
         input.value = '';
         return;
     }

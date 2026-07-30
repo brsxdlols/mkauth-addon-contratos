@@ -37,5 +37,9 @@ grep -q 'name="contratos_action"' \
     "$REPOSITORY_DIR/addons/contratos/index.php"
 grep -q "require_once __DIR__ . '/addons.class.php'" \
     "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
+grep -q "normalizarAssinaturaProvedor" \
+    "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
+grep -q "imagepng" \
+    "$REPOSITORY_DIR/addons/contratos/functions/normalizar_assinatura.php"
 
 echo "Validacao concluida com sucesso."

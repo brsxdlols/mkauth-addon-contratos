@@ -81,6 +81,9 @@ for command_name in php mysql mysqldump find cp mv mkdir chmod chown date; do
     command -v "$command_name" >/dev/null 2>&1 || fail "comando obrigatorio ausente: $command_name"
 done
 
+php -r 'exit(extension_loaded("gd") ? 0 : 1);' \
+    || fail "a extensao GD do PHP e obrigatoria para tratar a assinatura"
+
 if [ -f "$ADDONS_DIR/addon.js" ]; then
     ADDON_JS="$ADDONS_DIR/addon.js"
 elif [ -f "$MKAUTH_ROOT/admin/addon.js" ]; then
@@ -166,6 +169,7 @@ WHERE nome IN (
 grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$ADDON_JS" || fail "atalho do menu nao foi gravado"
 [ -f "$TARGET_DIR/index.php" ] || fail "arquivo principal do addon nao foi instalado"
 [ -f "$TARGET_DIR/upload_assinatura_provedor.php" ] || fail "upload da assinatura nao foi instalado"
+[ -f "$TARGET_DIR/functions/normalizar_assinatura.php" ] || fail "tratamento da assinatura nao foi instalado"
 [ -w "$SIGNATURE_BACKUP_DIR" ] || fail "diretorio de backup da assinatura sem permissao de escrita"
 
 ln -sfn "$BACKUP_DIR" "$BACKUP_ROOT/mkauth-addon-contratos-latest"

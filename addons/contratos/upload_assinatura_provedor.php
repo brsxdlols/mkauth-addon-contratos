@@ -4,6 +4,7 @@ declare(strict_types=1);
 // Carregar o mesmo bootstrap usado pelo index antes de abrir a sessão.
 // Quando este arquivo é incluído pelo index, require_once evita duplicação.
 require_once __DIR__ . '/addons.class.php';
+require_once __DIR__ . '/functions/normalizar_assinatura.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_name('mka');
@@ -103,6 +104,21 @@ if (!is_dir($backupDirectory) || !is_writable($backupDirectory)) {
     finalizarUploadAssinatura('error', 'O diretório de backup da assinatura não está disponível.');
 }
 
+$temporaryTarget = tempnam($targetDirectory, '.assinatura_provedor.upload-');
+if ($temporaryTarget === false) {
+    finalizarUploadAssinatura('error', 'Não foi possível preparar o arquivo da nova assinatura.');
+}
+
+try {
+    normalizarAssinaturaProvedor($temporaryUpload, $temporaryTarget);
+} catch (Throwable $exception) {
+    @unlink($temporaryTarget);
+    finalizarUploadAssinatura(
+        'error',
+        'Não foi possível padronizar a assinatura: ' . $exception->getMessage()
+    );
+}
+
 if (is_file($targetPath)) {
     $backupName = sprintf(
         '%s/assinatura_provedor-%s-%s',
@@ -112,6 +128,7 @@ if (is_file($targetPath)) {
     );
 
     if (!copy($targetPath, $backupName)) {
+        @unlink($temporaryTarget);
         finalizarUploadAssinatura('error', 'Não foi possível criar o backup da assinatura atual.');
     }
     chmod($backupName, 0600);
@@ -125,16 +142,6 @@ if (is_file($targetPath)) {
     }
 }
 
-$temporaryTarget = tempnam($targetDirectory, '.assinatura_provedor.upload-');
-if ($temporaryTarget === false) {
-    finalizarUploadAssinatura('error', 'Não foi possível preparar o arquivo da nova assinatura.');
-}
-
-if (!move_uploaded_file($temporaryUpload, $temporaryTarget)) {
-    @unlink($temporaryTarget);
-    finalizarUploadAssinatura('error', 'Não foi possível salvar a imagem enviada.');
-}
-
 chmod($temporaryTarget, 0644);
 if (!rename($temporaryTarget, $targetPath)) {
     @unlink($temporaryTarget);
@@ -146,5 +153,5 @@ $_SESSION['contratos_assinatura_csrf'] = bin2hex(random_bytes(32));
 
 finalizarUploadAssinatura(
     'success',
-    'Assinatura do provedor atualizada. A imagem foi salva como assinatura_provedor, sem extensão.'
+    'Assinatura atualizada com fundo branco e traços pretos. O arquivo foi salvo como assinatura_provedor, sem extensão.'
 );
