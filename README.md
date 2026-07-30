@@ -26,7 +26,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.1.0`.
+O instalador remoto usa por padrão a versão estável `v1.1.1`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 

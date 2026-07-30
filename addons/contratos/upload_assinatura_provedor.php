@@ -1,8 +1,12 @@
 <?php
 declare(strict_types=1);
 
-session_name('mka');
+// Carregar o mesmo bootstrap usado pelo index antes de abrir a sessão.
+// Quando este arquivo é incluído pelo index, require_once evita duplicação.
+require_once __DIR__ . '/addons.class.php';
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_name('mka');
     session_start();
 }
 

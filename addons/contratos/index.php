@@ -7,6 +7,15 @@ if (empty($_SESSION['mka_logado']) && empty($_SESSION['MKA_Logado']))
     exit(header("Location: ../../")
 );
 
+// Processar o upload pela mesma entrada autenticada que renderiza o addon.
+// Isso preserva o bootstrap e a sessão do MK Auth em todas as instalações.
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+    && ($_POST['contratos_action'] ?? '') === 'upload_assinatura_provedor'
+) {
+    require __DIR__ . '/upload_assinatura_provedor.php';
+}
+
 // Verificar permissões antes de carregar a página
 require_once 'functions/verificar_apparmor.php';
 $diagnostico = verificarAppArmor();
@@ -149,10 +158,15 @@ unset($_SESSION['contratos_assinatura_flash']);
             <form
                 id="signatureUploadForm"
                 class="signature-upload-container"
-                action="upload_assinatura_provedor.php"
+                action="index.php"
                 method="post"
                 enctype="multipart/form-data"
             >
+                <input
+                    type="hidden"
+                    name="contratos_action"
+                    value="upload_assinatura_provedor"
+                >
                 <input
                     type="hidden"
                     name="csrf_token"
