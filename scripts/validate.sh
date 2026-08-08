@@ -35,6 +35,10 @@ grep -q 'action="index.php"' \
     "$REPOSITORY_DIR/addons/contratos/index.php"
 grep -q 'name="contratos_action"' \
     "$REPOSITORY_DIR/addons/contratos/index.php"
+grep -q 'css/index.css?v=' \
+    "$REPOSITORY_DIR/addons/contratos/index.php"
+grep -q 'js/index.js?v=' \
+    "$REPOSITORY_DIR/addons/contratos/index.php"
 grep -q "require_once __DIR__ . '/addons.class.php'" \
     "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
 grep -q "normalizarAssinaturaProvedor" \

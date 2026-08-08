@@ -29,6 +29,14 @@ if (!$diagnostico['ok']) {
 // Incluir dados do index
 include 'functions/dados_index.php';
 
+// O MK Auth mantém CSS e JavaScript em cache por longos períodos.
+// Versionar as URLs impede que HTML novo seja combinado com assets antigos.
+$assetVersion = (
+    isset($Manifest)
+    && is_object($Manifest)
+    && isset($Manifest->{'version'})
+) ? (string) $Manifest->{'version'} : (string) filemtime(__FILE__);
+
 // Token e status do upload da assinatura do provedor
 if (empty($_SESSION['contratos_assinatura_csrf'])) {
     $_SESSION['contratos_assinatura_csrf'] = bin2hex(random_bytes(32));
@@ -51,7 +59,7 @@ unset($_SESSION['contratos_assinatura_flash']);
     <link href="../../estilos/mk-auth.css" rel="stylesheet" type="text/css" />
     <link href="../../estilos/font-awesome.css" rel="stylesheet" type="text/css" />
     <link href="../../estilos/bi-icons.css" rel="stylesheet" type="text/css" />
-    <link href="css/index.css" rel="stylesheet" type="text/css" />
+    <link href="css/index.css?v=<?= rawurlencode($assetVersion) ?>" rel="stylesheet" type="text/css" />
 
     <script src="../../scripts/jquery.js"></script>
     <script src="../../scripts/mk-auth.js"></script>
@@ -334,7 +342,7 @@ unset($_SESSION['contratos_assinatura_flash']);
     console.log('🔍 Total registros PHP:', <?php echo $totalRegistros ?? 0; ?>);
     </script>
     
-    <script src="js/index.js"></script>
+    <script src="js/index.js?v=<?= rawurlencode($assetVersion) ?>"></script>
 </body>
 
 </html>
