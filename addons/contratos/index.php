@@ -147,15 +147,36 @@ unset($_SESSION['contratos_assinatura_flash']);
             </div>
         <?php endif; ?>
 
+        <div class="contract-alerts" aria-label="Resumo dos contratos">
+            <button type="button" class="contract-card card-all active" data-status="todos" onclick="filtrarPorCard('todos', this)">
+                <span class="contract-card-label">Todos</span><strong><?= (int) $resumoContratos['all'] ?></strong><small>contratos assinados</small>
+            </button>
+            <button type="button" class="contract-card card-active" data-status="active" onclick="filtrarPorCard('active', this)">
+                <span class="contract-card-label">Ativos</span><strong><?= (int) $resumoContratos['active'] ?></strong><small>vigência em dia</small>
+            </button>
+            <button type="button" class="contract-card card-warning" data-status="warning" onclick="filtrarPorCard('warning', this)">
+                <span class="contract-card-label">A vencer</span><strong><?= (int) $resumoContratos['warning'] ?></strong><small>nos próximos 60 dias</small>
+            </button>
+            <button type="button" class="contract-card card-expired" data-status="expired" onclick="filtrarPorCard('expired', this)">
+                <span class="contract-card-label">Vencidos</span><strong><?= (int) $resumoContratos['expired'] ?></strong><small>pedindo renovação</small>
+            </button>
+        </div>
+
+        <?php if ((int) $resumoContratos['expired'] > 0 || (int) $resumoContratos['warning'] > 0): ?>
+            <div class="contract-warning-banner">
+                <i class="bi-exclamation-triangle-fill"></i>
+                <span><strong>Atenção:</strong> <?= (int) $resumoContratos['expired'] ?> vencido(s) e <?= (int) $resumoContratos['warning'] ?> próximo(s) do vencimento.</span>
+            </div>
+        <?php endif; ?>
+
         <div class="actions-bar">
             <div class="filter-container">
                 <label for="filterSelect">Filtrar por:</label>
                 <select id="filterSelect" onchange="filterTable()">
                     <option value="todos">Todos os Contratos</option>
-                    <option value="verde">Contratos em VERDE</option>
-                    <option value="amarelo">Contratos em AMARELO</option>
-                    <option value="laranja">Contratos em LARANJA</option>
-                    <option value="vermelho">Contratos em VERMELHO</option>
+                    <option value="active">Contratos Ativos</option>
+                    <option value="warning">Prestes a Vencer (60 dias)</option>
+                    <option value="expired">Contratos Vencidos</option>
                 </select>
             </div>
 
@@ -227,6 +248,7 @@ unset($_SESSION['contratos_assinatura_flash']);
                         <th class="desktop-title">DATA EXPIRAÇÃO</th>
                         <th class="desktop-title">TEMPO RESTANTE</th>
                         <th class="desktop-title">CONTRATO</th>
+                        <th class="desktop-title">RENOVAR</th>
                         <th class="desktop-title">EXCLUIR</th>
                         <th class="mobile-title">CLIENTE</th>
                         <th class="mobile-title">ST</th>
@@ -234,34 +256,20 @@ unset($_SESSION['contratos_assinatura_flash']);
                         <th class="mobile-title">EXPIRA</th>
                         <th class="mobile-title">RESTA</th>
                         <th class="mobile-title">PDF</th>
+                        <th class="mobile-title">REN</th>
                         <th class="mobile-title">EXC</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     foreach ($resultados as $resultado): 
-                        // Calcular texto do tempo restante
-                        $tempoRestante = '';
-                        if ($resultado['data_atual'] > $resultado['data_expiracao']) {
-                            $tempoRestante = 'EXPIRADO';
-                        } else {
-                            $meses = max(0, $resultado['meses_restantes']);
-                            $dias = max(0, $resultado['dias_restantes']);
-                            if ($meses > 0) {
-                                $mesesTexto = ($meses == 1) ? "mês" : "meses";
-                                $diasTexto = ($dias == 1) ? "dia" : "dias";
-                                $tempoRestante = "$meses $mesesTexto e $dias $diasTexto";
-                            } else {
-                                $diasTexto = ($dias == 1) ? "dia" : "dias";
-                                $tempoRestante = "$dias $diasTexto";
-                            }
-                        }
+                        $tempoRestante = $resultado['tempo_restante'];
                     ?>
-                        <tr>
+                        <tr data-status="<?= htmlspecialchars($resultado['status_key'], ENT_QUOTES, 'UTF-8') ?>">
                             <td style="text-align: left;"><?= htmlspecialchars($resultado['nome_cliente'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
-                                <span class="status-dot" style="background-color: <?= $resultado['status_color'] ?>;" title="<?= $resultado['status_fidelidade'] ?>"></span>
-                                <span class="status-text"><?= $resultado['status_fidelidade'] ?></span>
+                                <span class="status-dot" style="background-color: <?= $resultado['status_color'] ?>;" title="<?= $resultado['status_label'] ?>"></span>
+                                <span class="status-text"><?= $resultado['status_label'] ?></span>
                             </td>
                             <td><?= $resultado['data_criacao']->format('d/m/Y') ?></td>
                             <td><?= $resultado['data_expiracao']->format('d/m/Y') ?></td>
@@ -282,8 +290,14 @@ unset($_SESSION['contratos_assinatura_flash']);
                             </td>
 
                             <td>
+                                <button type="button" class="renew-btn" data-uuid="<?= htmlspecialchars($resultado['uuid_cliente'], ENT_QUOTES, 'UTF-8') ?>" data-login="<?= htmlspecialchars($resultado['login'], ENT_QUOTES, 'UTF-8') ?>" data-nome="<?= htmlspecialchars($resultado['nome_cliente'], ENT_QUOTES, 'UTF-8') ?>" title="Renovar a vigência deste contrato">
+                                    <i class="bi-pencil-square"></i><span>Renovar</span>
+                                </button>
+                            </td>
+
+                            <td>
                                 <i class="bi-trash3-fill" style="font-size: 18px; color: #ff3860 !important; cursor: pointer;"
-                                    onclick="confirmDelete('<?= htmlspecialchars('/opt/mk-auth/' . $resultado['caminho_arquivo'], ENT_QUOTES, 'UTF-8') ?>')"
+                                    data-delete-path="<?= htmlspecialchars('/opt/mk-auth' . $resultado['caminho_arquivo'], ENT_QUOTES, 'UTF-8') ?>"
                                     title="Excluir o contrato atual"></i>
                             </td>
                         </tr>
@@ -295,7 +309,7 @@ unset($_SESSION['contratos_assinatura_flash']);
         <div class="pagination-container">
             <?php 
             // Calcular os números de início e fim dos registros mostrados
-            $registroInicio = $offset + 1;
+            $registroInicio = $totalRegistros > 0 ? $offset + 1 : 0;
             $registroFim = min($offset + $registrosPorPagina, $totalRegistros);
             ?>
             <div class="pagination-info">
@@ -337,9 +351,7 @@ unset($_SESSION['contratos_assinatura_flash']);
     <!-- Todos os contratos carregados do PHP para busca global -->
     <script>
     window.todosContratos = <?php echo json_encode($todosResultadosParaJS ?? []); ?>;
-    console.log('✅ Carregados', window.todosContratos.length, 'contratos para busca global');
-    console.log('📋 Dados:', window.todosContratos);
-    console.log('🔍 Total registros PHP:', <?php echo $totalRegistros ?? 0; ?>);
+    window.resumoContratos = <?php echo json_encode($resumoContratos ?? []); ?>;
     </script>
     
     <script src="js/index.js?v=<?= rawurlencode($assetVersion) ?>"></script>

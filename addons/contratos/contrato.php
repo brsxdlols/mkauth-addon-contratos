@@ -18,7 +18,8 @@
     $baseURL = $protocol . '://' . $_SERVER['HTTP_HOST'];
 
     // Obtém o IP do usuário
-    $ip = getUserIP();     
+    $ip = getUserIP();
+    $assetVersion = (string) max(filemtime(__DIR__ . '/js/contrato.js'), filemtime(__DIR__ . '/css/contrato.css'));
 ?>
 
 <!DOCTYPE html>
@@ -27,7 +28,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assinatura de Contrato</title>
-    <link rel="stylesheet" href="css/contrato.css">
+    <link rel="stylesheet" href="css/contrato.css?v=<?= rawurlencode($assetVersion) ?>">
 </head>
 <body>
     <div class="header">
@@ -116,9 +117,9 @@
             
             <!-- Abas de métodos de assinatura -->
             <div class="tabs-assinatura">
-                <button class="tab-btn active" onclick="mudarAba('desenhar')">Desenhar</button>
-                <button class="tab-btn" onclick="mudarAba('digitar')">Digitar</button>
-                <button class="tab-btn" onclick="mudarAba('upload')">Upload</button>
+                <button class="tab-btn active" onclick="mudarAba('desenhar', this)">Desenhar</button>
+                <button class="tab-btn" onclick="mudarAba('digitar', this)">Digitar</button>
+                <button class="tab-btn" onclick="mudarAba('upload', this)">Upload</button>
             </div>
 
             <!-- Aba: Desenhar -->
@@ -174,10 +175,13 @@
             <span class="close" onclick="cancelarAssinatura()">&times;</span>
             <h2>Tirar Selfie</h2>
             <video id="videoSelfie" width="500" height="240" style="transform: scaleX(-1);" autoplay></video>
+            <p id="cameraStatus" class="camera-status">Aguardando permissão para acessar a câmera...</p>
             <div class="button-group">
                 <button class="botao-assinar" onclick="capturarSelfie()">Capturar Selfie</button>
+                <button class="botao-assinar botao-selfie-arquivo" type="button" onclick="document.getElementById('selfieFileInput').click()">Usar câmera/arquivo</button>
                 <button class="botao-limpar" onclick="cancelarAssinatura()">Cancelar</button>
             </div>
+            <input type="file" id="selfieFileInput" accept="image/*" capture="user" hidden onchange="processarSelfieArquivo(event)">
         </div>
     </div>
 
@@ -195,7 +199,11 @@
 
     <div id="user-data" data-uuid="<?php echo trim($uuid_cliente); ?>" data-nome="<?php echo $nome; ?>" style="display:none;"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-    <script src="js/contrato.js"></script>
+    <div id="pdfProgress" class="pdf-progress" hidden>
+        <div class="pdf-progress-card"><span class="pdf-spinner"></span><strong id="pdfProgressTitle">Preparando contrato...</strong><small id="pdfProgressDetail">Não feche esta página.</small></div>
+    </div>
+
+    <script src="vendor/html2pdf.bundle.min.js?v=0.10.1"></script>
+    <script src="js/contrato.js?v=<?= rawurlencode($assetVersion) ?>"></script>
 </body>
 </html>

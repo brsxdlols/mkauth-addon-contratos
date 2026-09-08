@@ -11,6 +11,12 @@ Instalador automatizado do addon de assinatura e controle de contratos para MK A
 - valida PNG, JPG, WEBP e GIF de até 5 MB e salva a imagem em `/opt/mk-auth/mkfiles/assinatura_provedor`, sem extensão;
 - converte automaticamente a assinatura para PNG com fundo branco e traços pretos, neutralizando fundos coloridos, papel fotografado e transparência;
 - versiona automaticamente o CSS e o JavaScript para impedir layouts antigos armazenados no cache do navegador;
+- gera o PDF com paginação protegida, sem cortar parágrafos ou separar o bloco de assinaturas;
+- inclui o gerador de PDF no próprio addon, sem depender de CDN durante a assinatura;
+- oferece fluxo mais leve para iPhone, alternativa de selfie por câmera/arquivo e confirmação real do upload;
+- registra diagnóstico por etapa em `addons/contratos/logs`, facilitando localizar falhas em celulares;
+- exibe cards clicáveis de contratos ativos, a vencer em 60 dias e vencidos;
+- permite renovar a vigência pelo próprio addon, com histórico preservado no banco;
 - mantém até 20 backups das assinaturas anteriores em `/var/backups/mkauth-addon-contratos-assinaturas`;
 - cria ou atualiza, sem duplicar, estes dois contratos nativos do MK Auth:
   - **CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO**
@@ -28,7 +34,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.2.1`.
+O instalador remoto usa por padrão a versão estável `v1.3.0`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 

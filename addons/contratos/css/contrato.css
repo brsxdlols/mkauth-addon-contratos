@@ -36,8 +36,36 @@ p {
 .texto-contrato h4,
 .texto-contrato h5,
 .texto-contrato h6 {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+    orphans: 4;
+    widows: 4;
+}
+
+body.pdf-rendering {
+    margin: 0 !important;
+}
+
+.texto-contrato li,
+.texto-contrato tr,
+.pdf-keep-together {
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+}
+
+.pdf-document {
+    width: 7.31in;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.pdf-document .texto-contrato > * {
+    max-width: 100%;
 }
 
 /* ====================
@@ -79,6 +107,8 @@ p {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
 }
 
 .assinatura-provedor, .assinatura-cliente {
@@ -244,6 +274,54 @@ video {
     line-height: 1.5;
     margin: 0;
 }
+
+.camera-status {
+    margin: 10px 0 0;
+    color: #4c6377;
+    font-weight: 600;
+}
+
+.camera-status.error { color: #b42318; }
+.botao-selfie-arquivo { background: #1479b8; }
+
+.pdf-progress[hidden] { display: none; }
+.pdf-progress {
+    position: fixed;
+    z-index: 99999;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(8, 24, 38, .72);
+}
+
+.pdf-progress-card {
+    width: min(92vw, 390px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 28px;
+    border-radius: 16px;
+    background: #fff;
+    color: #17324d;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .3);
+}
+
+.pdf-progress-card strong { font-size: 18px; }
+.pdf-progress-card small { font-size: 13px; color: #5d7183; }
+.pdf-spinner {
+    width: 34px;
+    height: 34px;
+    border: 4px solid #dcecf7;
+    border-top-color: #209cee;
+    border-radius: 50%;
+    animation: pdf-spin .75s linear infinite;
+}
+
+@keyframes pdf-spin { to { transform: rotate(360deg); } }
 
 /* ====================
    Container Central

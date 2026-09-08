@@ -1,5 +1,17 @@
 # Atualizações do Addon Contratos
 
+## Versão 2.4.0 — 7 de setembro de 2026
+
+- Corrigida a quebra de parágrafos e assinaturas entre páginas do PDF.
+- Gerador `html2pdf` atualizado e empacotado localmente.
+- Fluxo do iPhone aliviado para reduzir consumo de memória durante a geração.
+- Corrigida a troca de abas de assinatura no Safari/iOS.
+- Adicionada alternativa para capturar ou selecionar a selfie quando a câmera do navegador falhar.
+- Upload de PDF validado, atômico e com mensagens de erro reais.
+- Adicionados logs das etapas de geração e upload para diagnóstico.
+- Adicionados cards e filtros de ativos, a vencer em 60 dias e vencidos.
+- Adicionada renovação de vigência com histórico no banco de dados.
+
 ## Data: 18 de novembro de 2025
 
 ### 🔍 Busca Global Implementada

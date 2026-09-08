@@ -156,6 +156,9 @@ mkdir -p "$SIGNATURE_DIR" "$SIGNATURE_BACKUP_DIR"
 chown www-data:www-data "$SIGNATURE_BACKUP_DIR"
 chmod 0777 "$SIGNATURE_DIR"
 chmod 0700 "$SIGNATURE_BACKUP_DIR"
+mkdir -p "$TARGET_DIR/logs"
+chown -R www-data:www-data "$TARGET_DIR/logs"
+chmod 0775 "$TARGET_DIR/logs"
 
 CONTRACT_COUNT=$(mysql --default-character-set=utf8 -uroot -p"${MKAUTH_DB_PASSWORD:-vertrigo}" -N -B mkradius -e "
 SELECT COUNT(DISTINCT nome)
@@ -170,6 +173,10 @@ grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$ADDON_JS" || fail "atalho do menu nao fo
 [ -f "$TARGET_DIR/index.php" ] || fail "arquivo principal do addon nao foi instalado"
 [ -f "$TARGET_DIR/upload_assinatura_provedor.php" ] || fail "upload da assinatura nao foi instalado"
 [ -f "$TARGET_DIR/functions/normalizar_assinatura.php" ] || fail "tratamento da assinatura nao foi instalado"
+[ -f "$TARGET_DIR/functions/contract_history.php" ] || fail "historico de vigencias nao foi instalado"
+[ -f "$TARGET_DIR/renovacao.php" ] || fail "tela de renovacao nao foi instalada"
+[ -s "$TARGET_DIR/vendor/html2pdf.bundle.min.js" ] || fail "gerador local de PDF nao foi instalado"
+[ -w "$TARGET_DIR/logs" ] || fail "diretorio de diagnostico do envio sem permissao de escrita"
 [ -w "$SIGNATURE_BACKUP_DIR" ] || fail "diretorio de backup da assinatura sem permissao de escrita"
 
 ln -sfn "$BACKUP_DIR" "$BACKUP_ROOT/mkauth-addon-contratos-latest"

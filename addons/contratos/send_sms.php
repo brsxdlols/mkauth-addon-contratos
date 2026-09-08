@@ -61,7 +61,8 @@ function send_sms($message) {
         curl_setopt_array($curl, [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 30 // Ajuste o timeout conforme necessário
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT => 5
         ]);
 
         // Executa o cURL
