@@ -343,6 +343,17 @@ unset($_SESSION['contratos_assinatura_flash']);
         </div>
     </div>
 
+    <div id="renewalModal" class="renewal-modal" aria-hidden="true">
+        <button type="button" class="renewal-modal-backdrop" aria-label="Fechar renovação" data-renewal-close></button>
+        <section class="renewal-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="renewalModalTitle">
+            <header class="renewal-modal-header">
+                <h2 id="renewalModalTitle">Renovar contrato</h2>
+                <button type="button" class="renewal-modal-close" aria-label="Fechar renovação" data-renewal-close>&times;</button>
+            </header>
+            <iframe id="renewalModalFrame" title="Renovação de contrato" src="about:blank"></iframe>
+        </section>
+    </div>
+
     <?php include('../../baixo.php'); ?>
 
     <script src="../../menu.js.hhvm"></script>

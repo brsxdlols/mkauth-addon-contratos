@@ -69,9 +69,24 @@ $conecta->close();
                 <label class="field"><span>Nova vigência começa em</span><input type="date" name="start_date" value="<?= date('Y-m-d') ?>" required></label>
                 <label class="field"><span>Prazo</span><select name="duration_months"><?php foreach (contratos_allowed_durations() as $months): ?><option value="<?= $months ?>" <?= $months === 12 ? 'selected' : '' ?>><?= $months ?> <?= $months === 1 ? 'mês' : 'meses' ?></option><?php endforeach; ?></select></label>
             </div>
-            <div class="actions"><button class="btn secondary" type="button" onclick="window.close()">Fechar</button><button class="btn primary" type="submit">Renovar contrato</button></div>
+            <div class="actions"><button class="btn secondary" type="button" onclick="fecharRenovacao()">Fechar</button><button class="btn primary" type="submit">Renovar contrato</button></div>
         </form>
     </div>
 </div></div>
-<?php if ($messageType === 'success' && $message !== ''): ?><script>if(window.opener&&!window.opener.closed){window.opener.location.reload();}</script><?php endif; ?>
+<script>
+function fecharRenovacao() {
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({type: 'contratos-renovacao-close'}, window.location.origin);
+        return;
+    }
+    window.close();
+}
+<?php if ($messageType === 'success' && $message !== ''): ?>
+if (window.parent && window.parent !== window) {
+    window.parent.postMessage({type: 'contratos-renovacao-refresh'}, window.location.origin);
+} else if (window.opener && !window.opener.closed) {
+    window.opener.location.reload();
+}
+<?php endif; ?>
+</script>
 </body></html>

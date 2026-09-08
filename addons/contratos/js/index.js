@@ -16,15 +16,40 @@ function escapeAttribute(value) {
 
 function abrirRenovacao(uuid, login, nome) {
     const params = new URLSearchParams({uuid: uuid, login: login, nome: nome});
-    const width = Math.min(650, window.screen.availWidth - 30);
-    const height = Math.min(720, window.screen.availHeight - 60);
-    const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
-    const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
-    const popup = window.open('renovacao.php?' + params.toString(), 'renovacaoContrato', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
-    if (!popup) {
-        window.location.href = 'renovacao.php?' + params.toString();
-    }
+    const modal = document.getElementById('renewalModal');
+    const frame = document.getElementById('renewalModalFrame');
+    if (!modal || !frame) return;
+
+    frame.src = 'renovacao.php?' + params.toString();
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('renewal-modal-open');
+    const close = modal.querySelector('.renewal-modal-close');
+    if (close) close.focus();
 }
+
+function fecharRenovacao(recarregar) {
+    const modal = document.getElementById('renewalModal');
+    const frame = document.getElementById('renewalModalFrame');
+    if (!modal) return;
+
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('renewal-modal-open');
+    if (frame) window.setTimeout(function () { frame.src = 'about:blank'; }, 180);
+    if (recarregar) window.location.reload();
+}
+
+window.addEventListener('message', function (event) {
+    if (event.origin !== window.location.origin || !event.data) return;
+    if (event.data.type === 'contratos-renovacao-close') fecharRenovacao(false);
+    if (event.data.type === 'contratos-renovacao-refresh') fecharRenovacao(true);
+});
+
+document.addEventListener('keydown', function (event) {
+    const modal = document.getElementById('renewalModal');
+    if (event.key === 'Escape' && modal && modal.classList.contains('active')) fecharRenovacao(false);
+});
 
 function renderizarTabela(contratos) {
     const tbody = document.querySelector('#clientTable tbody');
@@ -53,6 +78,11 @@ function renderizarTabela(contratos) {
 }
 
 document.addEventListener('click', function (event) {
+    const closeRenewal = event.target.closest('[data-renewal-close]');
+    if (closeRenewal) {
+        fecharRenovacao(false);
+        return;
+    }
     const renew = event.target.closest('.renew-btn');
     if (renew && renew.dataset.uuid) {
         abrirRenovacao(renew.dataset.uuid, renew.dataset.login || '', renew.dataset.nome || '');

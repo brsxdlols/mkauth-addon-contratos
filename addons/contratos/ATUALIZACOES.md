@@ -1,5 +1,12 @@
 # Atualizações do Addon Contratos
 
+## Versão 2.4.1 — 8 de setembro de 2026
+
+- A renovação de vigência agora abre sempre em um modal dentro do addon.
+- Removida a abertura da renovação em uma nova janela do navegador.
+- O modal pode ser fechado pelo botão, pelo fundo escuro ou pela tecla Escape.
+- Após renovar, o modal fecha e a listagem é atualizada automaticamente.
+
 ## Versão 2.4.0 — 7 de setembro de 2026
 
 - Corrigida a quebra de parágrafos e assinaturas entre páginas do PDF.
