@@ -17,10 +17,10 @@ $paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
 $termoBusca = trim((string) ($_GET['busca'] ?? ''));
 $resultadosCompletos = array();
 
-$sql = "SELECT c.nome AS nome_cliente, c.login, c.contrato, c.uuid_cliente, sc.nome AS nome_contrato
+$sql = "SELECT c.nome AS nome_cliente, c.login, c.contrato, c.uuid_cliente, sc.nome AS nome_contrato, sc.texto AS texto_modelo
         FROM sis_cliente c
-        JOIN sis_contrato sc ON c.contrato = sc.codigo
-        WHERE c.cli_ativado = 's' AND c.contrato IS NOT NULL
+        LEFT JOIN sis_contrato sc ON c.contrato = sc.codigo
+        WHERE c.cli_ativado = 's'
         ORDER BY c.nome";
 $query = $conecta->query($sql);
 
@@ -73,6 +73,11 @@ if ($query) {
                 : $dias . ' ' . ($dias === 1 ? 'dia' : 'dias');
         }
 
+        $pendente = trim(html_entity_decode(strip_tags((string) ($row['texto_modelo'] ?? '')), ENT_QUOTES, 'UTF-8')) === '';
+        if ($pendente) {
+            $status = array('key' => 'pending', 'days' => 0, 'color' => '#b45309', 'label' => 'Pendente: modelo ausente');
+            $tempoRestante = 'Vincular modelo e solicitar nova assinatura';
+        }
         $resultadosCompletos[] = array(
             'nome_cliente' => $row['nome_cliente'],
             'login' => $row['login'],
@@ -83,7 +88,7 @@ if ($query) {
             'data_criacao' => $dataCriacao,
             'data_criacao_formatada' => $dataCriacao->format('d/m/Y'),
             'data_expiracao' => $dataExpiracao,
-            'data_expiracao_formatada' => $dataExpiracao->format('d/m/Y'),
+            'data_expiracao_formatada' => $pendente ? '--' : $dataExpiracao->format('d/m/Y'),
             'tempo_restante' => $tempoRestante,
             'dias_restantes_total' => (int) $status['days'],
             'status_key' => $status['key'],
@@ -100,7 +105,7 @@ usort($resultadosCompletos, function ($left, $right) {
     return $dateCompare !== 0 ? $dateCompare : strcasecmp($left['nome_cliente'], $right['nome_cliente']);
 });
 
-$resumoContratos = array('all' => count($resultadosCompletos), 'active' => 0, 'warning' => 0, 'expired' => 0);
+$resumoContratos = array('all' => count($resultadosCompletos), 'active' => 0, 'warning' => 0, 'expired' => 0, 'pending' => 0);
 foreach ($resultadosCompletos as $item) {
     if (isset($resumoContratos[$item['status_key']])) {
         $resumoContratos[$item['status_key']]++;

@@ -147,9 +147,14 @@ unset($_SESSION['contratos_assinatura_flash']);
             </div>
         <?php endif; ?>
 
+        <?php if (!empty($resumoContratos['pending'])): ?>
+        <div role="alert" style="padding:16px;background:#fff3cd;color:#854d0e;margin-bottom:16px;border-radius:12px">
+            <?= (int) $resumoContratos['pending'] ?> PDF(s) com modelo ausente no cadastro. Revise o documento, vincule o modelo correto e solicite nova assinatura. O PDF existente foi preservado.
+        </div>
+        <?php endif; ?>
         <div class="contract-alerts" aria-label="Resumo dos contratos">
             <button type="button" class="contract-card card-all active" data-status="todos" onclick="filtrarPorCard('todos', this)">
-                <span class="contract-card-label">Todos</span><strong><?= (int) $resumoContratos['all'] ?></strong><small>contratos assinados</small>
+                <span class="contract-card-label">Todos</span><strong><?= (int) $resumoContratos['all'] ?></strong><small>PDFs recebidos, incluindo pendências</small>
             </button>
             <button type="button" class="contract-card card-active" data-status="active" onclick="filtrarPorCard('active', this)">
                 <span class="contract-card-label">Ativos</span><strong><?= (int) $resumoContratos['active'] ?></strong><small>vigência em dia</small>
@@ -176,7 +181,7 @@ unset($_SESSION['contratos_assinatura_flash']);
                     <option value="todos">Todos os Contratos</option>
                     <option value="active">Contratos Ativos</option>
                     <option value="warning">Prestes a Vencer (60 dias)</option>
-                    <option value="expired">Contratos Vencidos</option>
+                    <option value="expired">Contratos Vencidos</option><option value="pending">Pendências: modelo ausente</option>
                 </select>
             </div>
 
@@ -272,7 +277,7 @@ unset($_SESSION['contratos_assinatura_flash']);
                                 <span class="status-text"><?= $resultado['status_label'] ?></span>
                             </td>
                             <td><?= $resultado['data_criacao']->format('d/m/Y') ?></td>
-                            <td><?= $resultado['data_expiracao']->format('d/m/Y') ?></td>
+                            <td><?= $resultado['data_expiracao_formatada'] ?></td>
                             <td><?= $tempoRestante ?></td>
                             <?php
                             // Detecta se a conexão é HTTPS ou HTTP

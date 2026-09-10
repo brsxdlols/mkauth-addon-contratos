@@ -19,6 +19,18 @@ $nome = trim((string) ($_REQUEST['nome'] ?? $login));
 $message = '';
 $messageType = 'success';
 
+$validation = $conecta->prepare('SELECT sc.texto FROM sis_cliente c JOIN sis_contrato sc ON sc.codigo = c.contrato WHERE c.uuid_cliente = ? LIMIT 1');
+if (!$validation) { http_response_code(500); exit('Não foi possível validar o modelo do contrato.'); }
+$validation->bind_param('s', $uuid);
+$validation->execute();
+$modelRow = $validation->get_result()->fetch_assoc();
+$validation->close();
+$modelValid = $modelRow && trim(html_entity_decode(strip_tags((string) $modelRow['texto']), ENT_QUOTES, 'UTF-8')) !== '';
+
+if (!$modelValid) {
+    http_response_code(422);
+    exit('PDF pendente: vincule o modelo correto, revise o PDF existente e solicite nova assinatura. Renovar a vigência não corrige um documento sem texto.');
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $duration = (int) ($_POST['duration_months'] ?? 12);
     $startDate = trim((string) ($_POST['start_date'] ?? date('Y-m-d')));

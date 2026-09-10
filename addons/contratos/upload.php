@@ -41,6 +41,17 @@ if (!preg_match('/^[A-Za-z0-9._-]{1,80}$/', $uuid)) {
     contratos_upload_response(400, 'error', 'Identificação do cliente inválida.');
 }
 
+$validation = $conecta->prepare('SELECT sc.texto FROM sis_cliente c JOIN sis_contrato sc ON sc.codigo = c.contrato WHERE c.uuid_cliente = ? LIMIT 1');
+if (!$validation) { http_response_code(500); exit('Não foi possível validar o modelo do contrato.'); }
+$validation->bind_param('s', $uuid);
+$validation->execute();
+$modelRow = $validation->get_result()->fetch_assoc();
+$validation->close();
+$modelValid = $modelRow && trim(html_entity_decode(strip_tags((string) $modelRow['texto']), ENT_QUOTES, 'UTF-8')) !== '';
+
+if (!$modelValid) {
+    contratos_upload_response(422, 'error', 'Nenhum modelo com texto está vinculado ao cadastro. Solicite a correção ao provedor antes de assinar.');
+}
 if (!isset($_FILES['arquivo']) || !is_array($_FILES['arquivo'])) {
     contratos_upload_log('missing_file', array('uuid' => $uuid));
     contratos_upload_response(400, 'error', 'O PDF não chegou ao servidor.');

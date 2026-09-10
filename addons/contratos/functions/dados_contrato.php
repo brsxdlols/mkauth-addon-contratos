@@ -105,7 +105,7 @@ $stmt_contrato = $conecta->prepare("SELECT texto, nome FROM sis_contrato WHERE c
 if (!$stmt_contrato) {
     die("Erro ao preparar consulta de contrato: " . $conecta->error);
 }
-$stmt_contrato->bind_param("s", $cliente['contrato']);
+$stmt_contrato->bind_param("s", $contratoNaoAssinado['contrato']);
 $stmt_contrato->execute();
 $response_contrato = $stmt_contrato->get_result();
 
@@ -115,6 +115,11 @@ if ($response_contrato && $response_contrato->num_rows > 0) {
     $nome_contrato = $contrato['nome'];
 }
 $stmt_contrato->close();
+if (trim(html_entity_decode(strip_tags((string) ($texto_contrato ?? '')), ENT_QUOTES, 'UTF-8')) === '') {
+    http_response_code(422);
+    exit('Contrato indisponível: nenhum modelo com texto está vinculado ao cadastro. Entre em contato com o provedor para corrigir antes de assinar.');
+}
+
 
 // Consultar dados do provedor
 $stmt_provedor = $conecta->prepare("SELECT * FROM sis_provedor");
