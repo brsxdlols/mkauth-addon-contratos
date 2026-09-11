@@ -654,7 +654,7 @@ tbody tr:hover {
 /* ==================== RESUMO, ALERTAS E RENOVAÇÃO ==================== */
 .contract-alerts {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 14px;
     margin-bottom: 16px;
 }
@@ -1041,3 +1041,5 @@ tbody tr:hover {
         font-size: 14px;
     }
 }
+
+.card-pending strong { color: #b45309; }

@@ -34,7 +34,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.3.2`.
+O instalador remoto usa por padrão a versão estável `v1.3.3`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 
@@ -105,7 +105,7 @@ installers/rollback.sh  restauração de backup
 scripts/validate.sh     validação do pacote
 ```
 
-## Correção de contratos sem modelo — v1.3.2
+## Correção de contratos sem modelo — v1.3.3
 
 - Exibe PDFs de clientes ativos mesmo quando o modelo vinculado não existe ou está sem texto, com status e filtro de pendências e sem apresentar vencimento presumido.
 - Bloqueia a abertura para assinatura, o upload e a renovação quando não existe modelo com texto vinculado ao cliente.

@@ -165,6 +165,9 @@ unset($_SESSION['contratos_assinatura_flash']);
             <button type="button" class="contract-card card-expired" data-status="expired" onclick="filtrarPorCard('expired', this)">
                 <span class="contract-card-label">Vencidos</span><strong><?= (int) $resumoContratos['expired'] ?></strong><small>pedindo renovação</small>
             </button>
+            <button type="button" class="contract-card card-pending" data-status="pending" onclick="filtrarPorCard('pending', this)">
+                <span class="contract-card-label">Pendências</span><strong><?= (int) $resumoContratos['pending'] ?></strong><small>modelo ausente ou sem texto</small>
+            </button>
         </div>
 
         <?php if ((int) $resumoContratos['expired'] > 0 || (int) $resumoContratos['warning'] > 0): ?>
