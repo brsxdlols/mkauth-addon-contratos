@@ -23,7 +23,6 @@ esac
 
 [ -f "$BACKUP_DIR/addon-existed" ] || fail "metadados do backup ausentes"
 [ -f "$BACKUP_DIR/addon-js-path" ] || fail "caminho do addon.js ausente"
-[ -f "$BACKUP_DIR/contracts-before.sql" ] || fail "backup do banco ausente"
 
 ROLLBACK_SAFETY="$BACKUP_DIR/current-before-rollback-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$ROLLBACK_SAFETY"
@@ -45,16 +44,7 @@ if [ -f "$BACKUP_DIR/addon.js" ]; then
     cp -a "$BACKUP_DIR/addon.js" "$ADDON_JS"
 fi
 
-mysql --default-character-set=utf8 -uroot -p"${MKAUTH_DB_PASSWORD:-vertrigo}" mkradius -e "
-DELETE FROM sis_contrato
-WHERE codigo IN ('addoncontrato_fidelidade_1ano','addoncontrato_internet_padrao')
-   OR nome IN (
-     'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO',
-     'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET'
-   );"
-mysql --default-character-set=utf8 -uroot -p"${MKAUTH_DB_PASSWORD:-vertrigo}" mkradius \
-    < "$BACKUP_DIR/contracts-before.sql"
-
+# File-only rollback: never restore or delete contract records, even from old backups.
 printf '%s\n' "[contratos] rollback concluido"
 printf '%s\n' "[contratos] backup restaurado: $BACKUP_DIR"
 printf '%s\n' "[contratos] estado anterior ao rollback: $ROLLBACK_SAFETY"

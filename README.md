@@ -18,13 +18,12 @@ Instalador automatizado do addon de assinatura e controle de contratos para MK A
 - exibe cards clicáveis de contratos ativos, a vencer em 60 dias e vencidos;
 - permite renovar a vigência pelo próprio addon, com histórico preservado no banco;
 - mantém até 20 backups das assinaturas anteriores em `/var/backups/mkauth-addon-contratos-assinaturas`;
-- cria ou atualiza, sem duplicar, estes dois contratos nativos do MK Auth:
-  - **CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO**
-  - **CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET**
-- cria backup automático dos arquivos, do `addon.js` e dos dois registros do banco antes de cada instalação;
-- valida a sintaxe PHP, o menu e os registros do banco antes de concluir.
+- preserva todos os modelos existentes, inclusive os dois modelos iniciais já personalizados;
+- não cria, atualiza nem exclui registros de contratos na instalação ou no rollback;
+- cria backup dos arquivos e do menu antes de atualizar;
+- preserva configuração local, conexão com o banco e logs do addon.
 
-Contratos já existentes com outros nomes ou códigos não são removidos. Se um dos dois contratos iniciais já existir, seu código é preservado para não quebrar clientes vinculados.
+O instalador completo instala ou atualiza o addon sem executar o script de modelos. Em instalações novas, os modelos devem ser cadastrados pelo administrador no MK Auth. PDFs, anexos, assinaturas e histórico existentes permanecem no servidor.
 
 ## Instalação via GitHub
 
@@ -34,7 +33,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.4.0`.
+O instalador remoto usa por padrão a versão estável `v1.4.1`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 
@@ -61,7 +60,7 @@ sh installers/install.sh
 
 ## Atualização
 
-O comando de instalação é idempotente e pode ser executado novamente. Ele atualiza os arquivos, consolida o menu em um único bloco e atualiza os dois modelos sem criar duplicatas.
+O comando de instalação é idempotente e pode ser executado novamente. Ele atualiza os arquivos e consolida o menu, sem alterar modelos ou registros de contratos.
 
 ## Backup e rollback
 
@@ -85,14 +84,12 @@ No checkout não estando mais disponível, baixe o script da mesma versão antes
 - acesso `root`;
 - PHP CLI com `mysqli`;
 - extensão PHP `gd`;
-- cliente MySQL/MariaDB e `mysqldump`;
+- banco MK Auth disponível para o funcionamento do addon;
 - `curl` ou `wget` para instalação remota.
 
-O banco padrão do MK Auth é utilizado. Se a senha local do MySQL tiver sido alterada, informe-a apenas para a execução:
+A atualização preserva `config.php` e `database/conexao.php` da instalação existente. O rollback restaura somente arquivos e menu; não restaura versões antigas dos modelos no banco.
 
-```sh
-MKAUTH_DB_PASSWORD='senha-local' sh installers/install.sh
-```
+Use o instalador v1.4.1 ou posterior para preservar os modelos. Os instaladores de versões anteriores podem sobrescrevê-los.
 
 ## Estrutura
 

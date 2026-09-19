@@ -13,7 +13,7 @@ SIGNATURE_BACKUP_DIR=${CONTRATOS_SIGNATURE_BACKUP_DIR:-/var/backups/mkauth-addon
 BACKUP_ROOT=${CONTRATOS_BACKUP_ROOT:-/root/backups}
 VERSION=$(tr -d '\r\n' < "$REPOSITORY_DIR/VERSION")
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-BACKUP_DIR="$BACKUP_ROOT/mkauth-addon-contratos-$TIMESTAMP-v$VERSION"
+BACKUP_DIR="$BACKUP_ROOT/mkauth-addon-contratos-$TIMESTAMP-v$VERSION-$$"
 STAGE_DIR="$ADDONS_DIR/.contratos.install.$$"
 SUCCESS=0
 MUTATED=0
@@ -50,17 +50,7 @@ restore_on_error() {
             cp -a "$BACKUP_DIR/addon.js" "$addon_js_restore" 2>/dev/null || true
         fi
 
-        if [ -f "$BACKUP_DIR/contracts-before.sql" ]; then
-            mysql --default-character-set=utf8 -uroot -p"${MKAUTH_DB_PASSWORD:-vertrigo}" mkradius \
-                -e "DELETE FROM sis_contrato
-                     WHERE codigo IN ('addoncontrato_fidelidade_1ano','addoncontrato_internet_padrao')
-                        OR nome IN (
-                          'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO',
-                          'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET'
-                        );" >/dev/null 2>&1 || true
-            mysql --default-character-set=utf8 -uroot -p"${MKAUTH_DB_PASSWORD:-vertrigo}" mkradius \
-                < "$BACKUP_DIR/contracts-before.sql" >/dev/null 2>&1 || true
-        fi
+
     fi
 
     if [ -d "$STAGE_DIR" ]; then
@@ -77,7 +67,7 @@ trap restore_on_error EXIT HUP INT TERM
 [ -s "$SOURCE_DIR/modelo_contrato_padrao.html" ] || fail "modelo de contrato padrao ausente"
 [ -s "$SOURCE_DIR/modelo_contrato_fidelidade.html" ] || fail "modelo com fidelidade ausente"
 
-for command_name in php mysql mysqldump find cp mv mkdir chmod chown date; do
+for command_name in php find cp mv mkdir chmod chown date; do
     command -v "$command_name" >/dev/null 2>&1 || fail "comando obrigatorio ausente: $command_name"
 done
 
@@ -94,7 +84,6 @@ fi
 
 log "validando PHP do pacote"
 find "$SOURCE_DIR" -type f -name '*.php' -exec php -l {} \; >/dev/null
-php -l "$SCRIPT_DIR/seed-contracts.php" >/dev/null
 php -l "$SCRIPT_DIR/update-addon-js.php" >/dev/null
 
 log "criando backup em $BACKUP_DIR"
@@ -113,21 +102,20 @@ if [ -f "$ADDON_JS" ]; then
     cp -a "$ADDON_JS" "$BACKUP_DIR/addon.js"
 fi
 
-mysqldump \
-    --default-character-set=utf8 \
-    --no-create-info \
-    --skip-triggers \
-    --compact \
-    --where="codigo IN ('addoncontrato_fidelidade_1ano','addoncontrato_internet_padrao') OR nome IN ('CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO','CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET')" \
-    -uroot \
-    -p"${MKAUTH_DB_PASSWORD:-vertrigo}" \
-    mkradius sis_contrato > "$BACKUP_DIR/contracts-before.sql"
-
 log "preparando arquivos do addon"
 [ "$STAGE_DIR" != "$ADDONS_DIR" ] || fail "diretorio temporario invalido"
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR"
 cp -a "$SOURCE_DIR/." "$STAGE_DIR/"
+# Preserve local paths, database configuration and diagnostic history on upgrades.
+for local_file in config.php database/conexao.php modelo_contrato_padrao.html modelo_contrato_fidelidade.html; do
+    if [ -f "$TARGET_DIR/$local_file" ]; then
+        cp -a "$TARGET_DIR/$local_file" "$STAGE_DIR/$local_file"
+    fi
+done
+if [ -d "$TARGET_DIR/logs" ]; then
+    cp -a "$TARGET_DIR/logs" "$STAGE_DIR/"
+fi
 find "$STAGE_DIR" -type f -iname 'desktop.ini' -delete
 find "$STAGE_DIR" -type d -exec chmod 0755 {} \;
 find "$STAGE_DIR" -type f -exec chmod 0644 {} \;
@@ -145,8 +133,7 @@ php "$SCRIPT_DIR/update-addon-js.php" "$ADDON_JS"
 chown www-data:www-data "$ADDON_JS"
 chmod 0644 "$ADDON_JS"
 
-log "criando ou atualizando os dois contratos iniciais"
-php "$SCRIPT_DIR/seed-contracts.php" "$TARGET_DIR"
+log "modelos existentes preservados: nenhuma escrita no banco durante a instalacao"
 
 log "ajustando diretorios de PDFs e da assinatura"
 mkdir -p "$STORAGE_DIR"
@@ -160,15 +147,6 @@ mkdir -p "$TARGET_DIR/logs"
 chown -R www-data:www-data "$TARGET_DIR/logs"
 chmod 0775 "$TARGET_DIR/logs"
 
-CONTRACT_COUNT=$(mysql --default-character-set=utf8 -uroot -p"${MKAUTH_DB_PASSWORD:-vertrigo}" -N -B mkradius -e "
-SELECT COUNT(DISTINCT nome)
-FROM sis_contrato
-WHERE nome IN (
-  'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO',
-  'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET'
-);")
-
-[ "$CONTRACT_COUNT" -eq 2 ] || fail "validacao do banco falhou: esperado 2, encontrado $CONTRACT_COUNT"
 grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$ADDON_JS" || fail "atalho do menu nao foi gravado"
 [ -f "$TARGET_DIR/index.php" ] || fail "arquivo principal do addon nao foi instalado"
 [ -f "$TARGET_DIR/upload_assinatura_provedor.php" ] || fail "upload da assinatura nao foi instalado"

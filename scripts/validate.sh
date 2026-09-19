@@ -46,7 +46,7 @@ grep -q "normalizarAssinaturaProvedor" \
     "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
 grep -q "imagepng" \
     "$REPOSITORY_DIR/addons/contratos/functions/normalizar_assinatura.php"
-grep -q "v1.4.0" "$REPOSITORY_DIR/installers/github-install.sh"
+grep -q "v1.4.1" "$REPOSITORY_DIR/installers/github-install.sh"
 grep -q "pdf-keep-together" "$REPOSITORY_DIR/addons/contratos/js/contrato.js"
 grep -q "registrar_evento.php" "$REPOSITORY_DIR/addons/contratos/js/contrato.js"
 grep -q "sis_contrato_historico" "$REPOSITORY_DIR/addons/contratos/functions/contract_history.php"
