@@ -1,6 +1,12 @@
 <?php
 include 'database/conexao.php';
 require_once __DIR__ . '/contract_history.php';
+require_once __DIR__ . '/attachments.php';
+contratos_attachment_schema($conecta);
+$anexos = array();
+$anexoQuery = $conecta->query('SELECT * FROM sis_contrato_anexo');
+if ($anexoQuery) while ($anexoRow = $anexoQuery->fetch_assoc()) $anexos[$anexoRow['uuid_cliente']] = $anexoRow;
+
 
 if (!defined('CONTRATOS_DIR')) {
     define('CONTRATOS_DIR', '/opt/mk-auth/admin/arquivos/');
@@ -32,13 +38,30 @@ if ($query) {
         }
 
         $arquivos = glob(rtrim(CONTRATOS_DIR, '/\\') . DIRECTORY_SEPARATOR . $uuid . DIRECTORY_SEPARATOR . 'contrato_*.pdf');
+        $anexo = $anexos[$uuid] ?? null;
+        if ($anexo && basename($anexo['filename']) === $anexo['filename']) {
+            $anexoPath = rtrim(CONTRATOS_DIR, '/').'/'.$uuid.'/'.$anexo['filename'];
+            if (is_file($anexoPath)) $arquivos[] = $anexoPath;
+            else $anexo = null;
+        } else { $anexo = null; }
         if (!$arquivos) {
+            $resultadosCompletos[] = array(
+                'nome_cliente'=>$row['nome_cliente'], 'login'=>$row['login'],
+                'nome_contrato'=>$row['nome_contrato'], 'uuid_cliente'=>$uuid,
+                'numero_contrato'=>$row['contrato'] ?? '', 'caminho_arquivo'=>'',
+                'data_criacao'=>null, 'data_expiracao'=>null,
+                'data_criacao_formatada'=>'--', 'data_expiracao_formatada'=>'--',
+                'tempo_restante'=>'Nenhum documento anexado', 'dias_restantes_total'=>0,
+                'status_key'=>'missing', 'status_color'=>'#64748b', 'status_label'=>'SEM CONTRATO',
+                'fonte_vigencia'=>'missing', 'anexado'=>false
+            );
             continue;
         }
         usort($arquivos, function ($left, $right) {
             return (int) @filemtime($right) - (int) @filemtime($left);
         });
         $arquivo = $arquivos[0];
+        if ($anexo && basename($arquivo) !== $anexo['filename']) $anexo = null;
         $timestamp = (int) @filemtime($arquivo);
         if ($timestamp <= 0) {
             continue;
@@ -47,7 +70,11 @@ if ($query) {
         $dataArquivo = new DateTime('@' . $timestamp);
         $dataArquivo->setTimezone(new DateTimeZone(date_default_timezone_get()));
         $historico = contratos_get_latest_history($conecta, $uuid, (string) $row['login']);
-        if ($historico && !empty($historico['start_date']) && !empty($historico['end_date'])) {
+        if ($anexo) {
+            $dataCriacao = new DateTime($anexo['start_date']);
+            $dataExpiracao = new DateTime($anexo['end_date'] ?: $anexo['start_date']);
+            $fonteVigencia = 'anexo';
+        } elseif ($historico && !empty($historico['start_date']) && !empty($historico['end_date'])) {
             $dataCriacao = new DateTime($historico['start_date']);
             $dataExpiracao = new DateTime($historico['end_date']);
             $fonteVigencia = 'history';
@@ -73,12 +100,17 @@ if ($query) {
                 : $dias . ' ' . ($dias === 1 ? 'dia' : 'dias');
         }
 
-        $pendente = trim(html_entity_decode(strip_tags((string) ($row['texto_modelo'] ?? '')), ENT_QUOTES, 'UTF-8')) === '';
+        $pendente = !$anexo && trim(html_entity_decode(strip_tags((string) ($row['texto_modelo'] ?? '')), ENT_QUOTES, 'UTF-8')) === '';
         if ($pendente) {
             $status = array('key' => 'pending', 'days' => 0, 'color' => '#b45309', 'label' => 'Pendente: modelo ausente');
             $tempoRestante = 'Vincular modelo e solicitar nova assinatura';
         }
+        if ($anexo && !$anexo['end_date']) {
+            $status = array('key'=>'attached', 'days'=>0, 'color'=>'#7c3aed', 'label'=>'ANEXADO');
+            $tempoRestante = 'Vencimento não informado';
+        }
         $resultadosCompletos[] = array(
+            'anexado' => (bool) $anexo,
             'nome_cliente' => $row['nome_cliente'],
             'login' => $row['login'],
             'nome_contrato' => $row['nome_contrato'],
@@ -88,7 +120,7 @@ if ($query) {
             'data_criacao' => $dataCriacao,
             'data_criacao_formatada' => $dataCriacao->format('d/m/Y'),
             'data_expiracao' => $dataExpiracao,
-            'data_expiracao_formatada' => $pendente ? '--' : $dataExpiracao->format('d/m/Y'),
+            'data_expiracao_formatada' => ($pendente || ($anexo && !$anexo['end_date'])) ? '--' : $dataExpiracao->format('d/m/Y'),
             'tempo_restante' => $tempoRestante,
             'dias_restantes_total' => (int) $status['days'],
             'status_key' => $status['key'],
@@ -101,11 +133,11 @@ if ($query) {
 }
 
 usort($resultadosCompletos, function ($left, $right) {
-    $dateCompare = $left['data_expiracao']->getTimestamp() <=> $right['data_expiracao']->getTimestamp();
+    $dateCompare = ($left['data_expiracao'] ? $left['data_expiracao']->getTimestamp() : PHP_INT_MAX) <=> ($right['data_expiracao'] ? $right['data_expiracao']->getTimestamp() : PHP_INT_MAX);
     return $dateCompare !== 0 ? $dateCompare : strcasecmp($left['nome_cliente'], $right['nome_cliente']);
 });
 
-$resumoContratos = array('all' => count($resultadosCompletos), 'active' => 0, 'warning' => 0, 'expired' => 0, 'pending' => 0);
+$resumoContratos = array('all' => count($resultadosCompletos), 'active' => 0, 'warning' => 0, 'expired' => 0, 'pending' => 0, 'missing' => 0, 'attached' => 0);
 foreach ($resultadosCompletos as $item) {
     if (isset($resumoContratos[$item['status_key']])) {
         $resumoContratos[$item['status_key']]++;
@@ -124,7 +156,7 @@ $paginaAtual = min($paginaAtual, $totalPaginas);
 $offset = ($paginaAtual - 1) * $registrosPorPagina;
 $todosResultadosParaJS = array_map(function ($item) {
     return array(
-        'nome_cliente' => $item['nome_cliente'], 'login' => $item['login'],
+        'anexado' => $item['anexado'], 'nome_cliente' => $item['nome_cliente'], 'login' => $item['login'],
         'nome_contrato' => $item['nome_contrato'], 'uuid_cliente' => $item['uuid_cliente'],
         'numero_contrato' => $item['numero_contrato'], 'caminho_arquivo' => $item['caminho_arquivo'],
         'data_criacao_formatada' => $item['data_criacao_formatada'],

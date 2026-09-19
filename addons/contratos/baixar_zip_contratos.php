@@ -5,6 +5,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (empty($_SESSION['mka_logado']) && empty($_SESSION['MKA_Logado'])) {
+    http_response_code(403); exit('Acesso negado.');
+}
 // Conexão direta com banco
 $host = "127.0.0.1";
 $user = "root";
@@ -23,9 +26,9 @@ define('CONTRATOS_DIR', '/opt/mk-auth/admin/arquivos/');
 
 // Buscar todos os clientes com contratos
 $sql = "SELECT c.nome AS nome_cliente, c.contrato, c.uuid_cliente, sc.nome AS nome_contrato
-        FROM sis_cliente c 
-        JOIN sis_contrato sc ON c.contrato = sc.codigo 
-        WHERE c.cli_ativado = 's' AND c.contrato IS NOT NULL
+        FROM sis_cliente c
+        LEFT JOIN sis_contrato sc ON c.contrato = sc.codigo
+        WHERE c.cli_ativado = 's'
         ORDER BY c.nome ASC";
 
 $resultado = $conecta->query($sql);
@@ -51,10 +54,10 @@ $arquivosProcessados = [];
 while ($row = $resultado->fetch_assoc()) {
     // Caminho da pasta do cliente onde o PDF deve ser buscado
     $pastaContrato = CONTRATOS_DIR . $row['uuid_cliente'] . "/";
-    
+
     // Busca arquivos que começam com 'contrato_' e terminam com '.pdf'
-    $arquivos = glob($pastaContrato . "contrato_*.pdf");
-    
+    $arquivos = glob($pastaContrato . "contrato_*.{pdf,jpg,png}", GLOB_BRACE);
+
     // Verifica se foram encontrados arquivos
     if (!empty($arquivos)) {
         foreach ($arquivos as $arquivo) {
@@ -62,11 +65,11 @@ while ($row = $resultado->fetch_assoc()) {
                 // Criar um nome único para o arquivo no ZIP
                 // Formato: NomeCliente_TipoContrato_arquivo.pdf
                 $nomeCliente = preg_replace('/[^a-zA-Z0-9_-]/', '_', $row['nome_cliente']);
-                $nomeContrato = preg_replace('/[^a-zA-Z0-9_-]/', '_', $row['nome_contrato']);
+                $nomeContrato = preg_replace('/[^a-zA-Z0-9_-]/', '_', ($row['nome_contrato'] ?? 'Anexado'));
                 $nomeArquivo = basename($arquivo);
-                
+
                 $nomeNoZip = $nomeCliente . '_' . $nomeContrato . '_' . $nomeArquivo;
-                
+
                 // Adicionar arquivo ao ZIP
                 if ($zip->addFile($arquivo, $nomeNoZip)) {
                     $totalAdicionados++;

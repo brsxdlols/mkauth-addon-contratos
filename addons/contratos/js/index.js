@@ -70,9 +70,9 @@ function renderizarTabela(contratos) {
             <td>${escapeHtml(item.data_criacao_formatada)}</td>
             <td>${escapeHtml(item.data_expiracao_formatada)}</td>
             <td>${escapeHtml(item.tempo_restante)}</td>
-            <td><a href="${escapeAttribute(pdfURL)}" target="_blank" rel="noopener" title="Abrir contrato"><img src="images/pdf.png" alt="PDF" width="23" height="23"></a></td>
-            <td><button type="button" class="renew-btn" data-uuid="${uuid}" data-login="${login}" data-nome="${nome}" title="Renovar a vigência"><i class="bi-pencil-square"></i><span>Renovar</span></button></td>
-            <td><i class="bi-trash3-fill" style="font-size:18px;color:#ff3860!important;cursor:pointer" data-delete-path="/opt/mk-auth${escapeAttribute(pdfURL)}" title="Excluir o contrato atual"></i></td>
+            <td>${!item.caminho_arquivo ? '<a class="attach-btn" href="anexar_contrato.php?uuid=' + encodeURIComponent(item.uuid_cliente) + '">Anexar contrato</a>' : '<a href="' + escapeAttribute(pdfURL) + '" target="_blank" rel="noopener">Abrir contrato</a>' + (item.anexado ? '<small class="attachment-label">Anexado</small>' : '')}</td>
+            <td>${item.caminho_arquivo && !item.anexado && item.status_key !== 'pending' ? '<button type="button" class="renew-btn" data-uuid="' + uuid + '" data-login="' + login + '" data-nome="' + nome + '">Renovar</button>' : '--'}</td>
+            <td>${item.caminho_arquivo && !item.anexado ? '<i class="bi-trash3-fill" style="color:#ff3860;cursor:pointer" data-delete-path="/opt/mk-auth' + escapeAttribute(pdfURL) + '" title="Excluir o contrato atual"></i>' : '--'}</td>
         </tr>`;
     }).join('');
 }

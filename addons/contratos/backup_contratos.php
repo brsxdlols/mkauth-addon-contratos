@@ -73,9 +73,9 @@ define('CONTRATOS_DIR', '/opt/mk-auth/admin/arquivos/');
 
 // Buscar todos os clientes com contratos
 $sql = "SELECT c.nome AS nome_cliente, c.contrato, c.uuid_cliente, sc.nome AS nome_contrato
-        FROM sis_cliente c 
-        JOIN sis_contrato sc ON c.contrato = sc.codigo 
-        WHERE c.cli_ativado = 's' AND c.contrato IS NOT NULL
+        FROM sis_cliente c
+        LEFT JOIN sis_contrato sc ON c.contrato = sc.codigo
+        WHERE c.cli_ativado = 's'
         ORDER BY c.nome ASC";
 
 $resultado = $conecta->query($sql);
@@ -319,7 +319,7 @@ $html = '<!DOCTYPE html>
             <h1>📄 Backup de Contratos</h1>
             <p>Baixe todos os contratos individualmente</p>
         </div>
-        
+
         <div class="stats">
             <div class="stat">
                 <div class="stat-value" id="totalContratos">0</div>
@@ -330,7 +330,7 @@ $html = '<!DOCTYPE html>
                 <div class="stat-label">Baixados</div>
             </div>
         </div>
-        
+
         <div class="actions">
             <button class="btn btn-primary" onclick="baixarTodos()">
                 <span>⬇️</span> Baixar Todos (Individual)
@@ -342,13 +342,13 @@ $html = '<!DOCTYPE html>
                 <span>◀️</span> Voltar
             </button>
         </div>
-        
+
         <div class="progress-container" id="progressContainer">
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill">0%</div>
             </div>
         </div>
-        
+
         <div class="list" id="contratosList">
 ';
 
@@ -358,10 +358,10 @@ $totalContratos = 0;
 while ($row = $resultado->fetch_assoc()) {
     // Caminho da pasta do cliente onde o PDF deve ser buscado
     $pastaContrato = CONTRATOS_DIR . $row['uuid_cliente'] . "/";
-    
+
     // Busca arquivos que começam com 'contrato_' e terminam com '.pdf'
-    $arquivos = glob($pastaContrato . "contrato_*.pdf");
-    
+    $arquivos = glob($pastaContrato . "contrato_*.{pdf,jpg,png}", GLOB_BRACE);
+
     // Verifica se foram encontrados arquivos
     if (!empty($arquivos)) {
         foreach ($arquivos as $arquivo) {
@@ -369,12 +369,12 @@ while ($row = $resultado->fetch_assoc()) {
                 $nomeCliente = htmlspecialchars($row['nome_cliente'], ENT_QUOTES, 'UTF-8');
                 $nomeContrato = htmlspecialchars($row['nome_contrato'], ENT_QUOTES, 'UTF-8');
                 $nomeArquivo = basename($arquivo);
-                
+
                 // Detectar protocolo
                 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http";
                 $baseURL = $protocol . '://' . $_SERVER['HTTP_HOST'];
                 $urlArquivo = $baseURL . '/admin/arquivos/' . htmlspecialchars($row['uuid_cliente'], ENT_QUOTES, 'UTF-8') . '/' . htmlspecialchars($nomeArquivo, ENT_QUOTES, 'UTF-8');
-                
+
                 $html .= '<div class="item">
                     <div class="item-info">
                         <div class="item-name">' . $nomeCliente . '</div>
@@ -386,7 +386,7 @@ while ($row = $resultado->fetch_assoc()) {
                         </a>
                     </div>
                 </div>';
-                
+
                 $totalContratos++;
             }
         }
@@ -399,26 +399,26 @@ $conecta->close();
 $html .= '
         </div>
     </div>
-    
+
     <script>
         document.getElementById("totalContratos").textContent = ' . $totalContratos . ';
-        
+
         let baixadosCount = 0;
-        
+
         function atualizarContador() {
             document.getElementById("baixados").textContent = baixadosCount;
             const percent = Math.round((baixadosCount / ' . $totalContratos . ') * 100);
             document.getElementById("progressFill").style.width = percent + "%";
             document.getElementById("progressFill").textContent = percent + "%";
         }
-        
+
         function baixarTodos() {
             const links = document.querySelectorAll(".download-btn");
             const progressContainer = document.getElementById("progressContainer");
             progressContainer.style.display = "block";
             baixadosCount = 0;
             atualizarContador();
-            
+
             let delay = 0;
             links.forEach((link, index) => {
                 setTimeout(() => {
@@ -429,12 +429,12 @@ $html .= '
                 delay += 300; // 300ms entre cada download
             });
         }
-        
+
         // Monitorar cliques individuais
         document.querySelectorAll(".download-btn").forEach(btn => {
             btn.addEventListener("click", function() {
                 setTimeout(() => {
-                    if (!document.getElementById("progressContainer").style.display || 
+                    if (!document.getElementById("progressContainer").style.display ||
                         document.getElementById("progressContainer").style.display === "none") {
                         baixadosCount++;
                         atualizarContador();

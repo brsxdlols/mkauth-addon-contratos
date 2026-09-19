@@ -154,7 +154,7 @@ unset($_SESSION['contratos_assinatura_flash']);
         <?php endif; ?>
         <div class="contract-alerts" aria-label="Resumo dos contratos">
             <button type="button" class="contract-card card-all active" data-status="todos" onclick="filtrarPorCard('todos', this)">
-                <span class="contract-card-label">Todos</span><strong><?= (int) $resumoContratos['all'] ?></strong><small>PDFs recebidos, incluindo pendências</small>
+                <span class="contract-card-label">Todos</span><strong><?= (int) $resumoContratos['all'] ?></strong><small>clientes ativos cadastrados</small>
             </button>
             <button type="button" class="contract-card card-active" data-status="active" onclick="filtrarPorCard('active', this)">
                 <span class="contract-card-label">Ativos</span><strong><?= (int) $resumoContratos['active'] ?></strong><small>vigência em dia</small>
@@ -167,6 +167,12 @@ unset($_SESSION['contratos_assinatura_flash']);
             </button>
             <button type="button" class="contract-card card-pending" data-status="pending" onclick="filtrarPorCard('pending', this)">
                 <span class="contract-card-label">Pendências</span><strong><?= (int) $resumoContratos['pending'] ?></strong><small>modelo ausente ou sem texto</small>
+            </button>
+            <button type="button" class="contract-card card-missing" data-status="missing" onclick="filtrarPorCard('missing', this)">
+                <span class="contract-card-label">Sem contrato</span><strong><?= (int) $resumoContratos['missing'] ?></strong><small>nenhum documento anexado</small>
+            </button>
+            <button type="button" class="contract-card card-attached" data-status="attached" onclick="filtrarPorCard('attached', this)">
+                <span class="contract-card-label">Sem vencimento</span><strong><?= (int) $resumoContratos['attached'] ?></strong><small>anexos sem prazo informado</small>
             </button>
         </div>
 
@@ -184,7 +190,7 @@ unset($_SESSION['contratos_assinatura_flash']);
                     <option value="todos">Todos os Contratos</option>
                     <option value="active">Contratos Ativos</option>
                     <option value="warning">Prestes a Vencer (60 dias)</option>
-                    <option value="expired">Contratos Vencidos</option><option value="pending">Pendências: modelo ausente</option>
+                    <option value="expired">Contratos Vencidos</option><option value="pending">Pendências: modelo ausente</option><option value="missing">Clientes sem contrato</option><option value="attached">Anexados sem vencimento</option>
                 </select>
             </div>
 
@@ -279,7 +285,7 @@ unset($_SESSION['contratos_assinatura_flash']);
                                 <span class="status-dot" style="background-color: <?= $resultado['status_color'] ?>;" title="<?= $resultado['status_label'] ?>"></span>
                                 <span class="status-text"><?= $resultado['status_label'] ?></span>
                             </td>
-                            <td><?= $resultado['data_criacao']->format('d/m/Y') ?></td>
+                            <td><?= $resultado['data_criacao_formatada'] ?></td>
                             <td><?= $resultado['data_expiracao_formatada'] ?></td>
                             <td><?= $tempoRestante ?></td>
                             <?php
@@ -292,21 +298,30 @@ unset($_SESSION['contratos_assinatura_flash']);
                             ?>
 
                             <td>
-                                <a href="<?= $baseURL . '/' . ltrim(htmlspecialchars($caminhoArquivo, ENT_QUOTES, 'UTF-8'), '/') ?>" target="_blank" title="Baixar o contrato em PDF">
-                                    <img src="images/pdf.png" alt="PDF" width="23" height="23">
+                                <?php if (!$resultado['caminho_arquivo']): ?>
+                                <a class="attach-btn" href="anexar_contrato.php?uuid=<?= rawurlencode($resultado['uuid_cliente']) ?>">Anexar contrato</a>
+                                <?php else: ?>
+                                <a href="<?= $baseURL . '/' . ltrim(htmlspecialchars($caminhoArquivo, ENT_QUOTES, 'UTF-8'), '/') ?>" target="_blank" title="Abrir documento do contrato">
+                                    <img src="images/pdf.png" alt="Contrato" width="23" height="23">
                                 </a>
+                                <?php if ($resultado['anexado']): ?><small class="attachment-label">Anexado</small><?php endif; ?>
+                                <?php endif; ?>
                             </td>
 
                             <td>
+                                <?php if ($resultado['caminho_arquivo'] && !$resultado['anexado'] && $resultado['status_key'] !== 'pending'): ?>
                                 <button type="button" class="renew-btn" data-uuid="<?= htmlspecialchars($resultado['uuid_cliente'], ENT_QUOTES, 'UTF-8') ?>" data-login="<?= htmlspecialchars($resultado['login'], ENT_QUOTES, 'UTF-8') ?>" data-nome="<?= htmlspecialchars($resultado['nome_cliente'], ENT_QUOTES, 'UTF-8') ?>" title="Renovar a vigência deste contrato">
                                     <i class="bi-pencil-square"></i><span>Renovar</span>
                                 </button>
+                                <?php else: ?>--<?php endif; ?>
                             </td>
 
                             <td>
+                                <?php if ($resultado['caminho_arquivo'] && !$resultado['anexado']): ?>
                                 <i class="bi-trash3-fill" style="font-size: 18px; color: #ff3860 !important; cursor: pointer;"
                                     data-delete-path="<?= htmlspecialchars('/opt/mk-auth' . $resultado['caminho_arquivo'], ENT_QUOTES, 'UTF-8') ?>"
                                     title="Excluir o contrato atual"></i>
+                                <?php else: ?>--<?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

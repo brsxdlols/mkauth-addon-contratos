@@ -654,7 +654,7 @@ tbody tr:hover {
 /* ==================== RESUMO, ALERTAS E RENOVAÇÃO ==================== */
 .contract-alerts {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
     gap: 14px;
     margin-bottom: 16px;
 }
@@ -1043,3 +1043,5 @@ tbody tr:hover {
 }
 
 .card-pending strong { color: #b45309; }
+
+.card-missing strong{color:#64748b}.card-attached strong{color:#7c3aed}.attach-btn{display:inline-block;background:#168bd4;color:white!important;padding:9px 12px;border-radius:8px;text-decoration:none;white-space:nowrap}.attachment-label{display:block;color:#7c3aed;margin-top:5px}

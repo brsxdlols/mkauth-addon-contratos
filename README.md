@@ -34,7 +34,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.3.3`.
+O instalador remoto usa por padrão a versão estável `v1.4.0`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 
@@ -105,10 +105,18 @@ installers/rollback.sh  restauração de backup
 scripts/validate.sh     validação do pacote
 ```
 
-## Correção de contratos sem modelo — v1.3.3
+## Correção de contratos sem modelo — v1.4.0
 
 - Exibe PDFs de clientes ativos mesmo quando o modelo vinculado não existe ou está sem texto, com status e filtro de pendências e sem apresentar vencimento presumido.
 - Bloqueia a abertura para assinatura, o upload e a renovação quando não existe modelo com texto vinculado ao cliente.
 - Aceita qualquer modelo vinculado do MK Auth; não se limita aos modelos do instalador.
 - Preserva os PDFs existentes. A pendência indica o estado atual do cadastro e não comprova o conteúdo do PDF ou como estava o cadastro na data da assinatura.
 - Para documentos incompletos, revisar o PDF, escolher o modelo correto e providenciar nova assinatura; a atualização não reconstrói contratos antigos nem escolhe modelos automaticamente.
+
+## Contratos existentes e clientes sem documento — v1.4.0
+
+O card Todos inclui todos os clientes ativos. Sem contrato identifica quem não tem documento no addon; o botão Anexar contrato permite enviar PDF, JPG ou PNG (até 20 MB, sujeito ao limite PHP). Para contratos físicos com várias páginas, envie um PDF único.
+
+O upload exige sessão administrativa e token CSRF, valida o tipo real do arquivo, registra operador, origem e datas e recusa substituir documentos existentes. Aceita contratos externos independentemente do modelo cadastrado. A data original é obrigatória; sem data de vencimento, exibe Anexado e não presume prazo. Anexos com vencimento participam dos cards de vigência. Os anexos também aparecem no backup de documentos.
+
+Não cria assinatura digital nem altera o cadastro do cliente. Documentos e metadados são preservados nas atualizações, em admin/arquivos e sis_contrato_anexo. Inclua ambos no backup do servidor. O botão Renovar permanece destinado ao fluxo de contratos digitais do addon.
