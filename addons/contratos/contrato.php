@@ -2,12 +2,12 @@
     // pega dados do contrato
     require 'functions/dados_contrato.php';
     
-    // Recebe o JSON com o timezone do JavaScript
-    $data = json_decode(file_get_contents("php://input"), true);
-    $timezonelocal = $data['timezone'] ?? 'America/Manaus'; // Fuso horário padrão caso não seja enviado
-
-    // Configura o fuso horário
-    date_default_timezone_set($timezonelocal);
+    // Use the server timezone, not an implicit Manaus/browser timezone.
+    $serverTimezone = trim((string) @file_get_contents('/etc/timezone'));
+    if (!in_array($serverTimezone, DateTimeZone::listIdentifiers(), true)) {
+        $serverTimezone = date_default_timezone_get();
+    }
+    date_default_timezone_set($serverTimezone);
 
     // Cria uma nova instância de DateTime e configura a localização
     $dataHora = new DateTime();

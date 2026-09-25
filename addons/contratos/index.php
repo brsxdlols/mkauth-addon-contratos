@@ -295,13 +295,14 @@ unset($_SESSION['contratos_assinatura_flash']);
 
                             // Remove o prefixo "/opt/mk-auth" do caminho do arquivo, caso exista
                             $caminhoArquivo = str_replace('/opt/mk-auth', '', $resultado['caminho_arquivo']);
+                            $documentVersion = @hash_file('sha256', '/opt/mk-auth/' . ltrim($caminhoArquivo, '/')) ?: time();
                             ?>
 
                             <td>
                                 <?php if (!$resultado['caminho_arquivo']): ?>
                                 <a class="attach-btn" href="anexar_contrato.php?uuid=<?= rawurlencode($resultado['uuid_cliente']) ?>">Anexar contrato</a>
                                 <?php else: ?>
-                                <a href="<?= $baseURL . '/' . ltrim(htmlspecialchars($caminhoArquivo, ENT_QUOTES, 'UTF-8'), '/') ?>" target="_blank" title="Abrir documento do contrato">
+                                <a href="<?= $baseURL . '/' . ltrim(htmlspecialchars($caminhoArquivo, ENT_QUOTES, 'UTF-8'), '/') . '?v=' . rawurlencode((string) $documentVersion) ?>" target="_blank" title="Abrir documento do contrato">
                                     <img src="images/pdf.png" alt="Contrato" width="23" height="23">
                                 </a>
                                 <?php if ($resultado['anexado']): ?><small class="attachment-label">Anexado</small><?php endif; ?>

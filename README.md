@@ -33,7 +33,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.4.2`.
+O instalador remoto usa por padrão a versão estável `v1.4.3`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 
@@ -118,8 +118,8 @@ O upload exige sessão administrativa e token CSRF, valida o tipo real do arquiv
 
 Não cria assinatura digital nem altera o cadastro do cliente. Documentos e metadados são preservados nas atualizações, em admin/arquivos e sis_contrato_anexo. Inclua ambos no backup do servidor. O botão Renovar permanece destinado ao fluxo de contratos digitais do addon.
 
-## PDF em celulares e confirmação de exclusão — v1.4.2
+## PDF em celulares e confirmação de exclusão — v1.4.3
 
 Renderiza uma página A4 por vez, limitando o tamanho do canvas e verificando conteúdo antes do envio. O servidor também recusa PDFs do gerador cujas imagens JPEG sejam inteiramente brancas. A verificação não constitui validação do texto ou da assinatura.
 
-A exclusão exige sessão administrativa, confirmação em formulário e token CSRF. O arquivo é movido para .contratos-excluidos na pasta do cliente, preservando o original. Reenvios preservam o PDF anterior em .contratos-anteriores. A atualização não recria PDFs brancos já recebidos; estes precisam de nova assinatura. Modelos no banco continuam preservados.
+A exclusão exige sessão administrativa, confirmação em formulário e token CSRF. O arquivo selecionado é apagado definitivamente após confirmação. Históricos criados por versões anteriores não são removidos automaticamente. Reenvios preservam o PDF anterior em .contratos-anteriores. A atualização não recria PDFs brancos já recebidos; estes precisam de nova assinatura. Modelos no banco continuam preservados.
