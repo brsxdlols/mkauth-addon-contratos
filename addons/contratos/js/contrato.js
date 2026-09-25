@@ -280,6 +280,15 @@ function criarDocumentoPDF() {
         const node = document.querySelector(selector);
         if (node) source.appendChild(node.cloneNode(true));
     });
+    // Keep the captured photo and access record on the same PDF page.
+    const evidence = document.createElement('div');
+    evidence.className = 'pdf-keep-together';
+    evidence.style.display = 'flow-root';
+    ['#conteudo-selfie', '.container'].forEach((selector) => {
+        const node = source.querySelector(selector);
+        if (node) evidence.appendChild(node);
+    });
+    if (evidence.childElementCount) source.appendChild(evidence);
     source.querySelectorAll('button,video,input').forEach((node) => node.remove());
     source.querySelectorAll('.texto-contrato > p,.texto-contrato > div,.texto-contrato > table,.texto-contrato > ul,.texto-contrato > ol,.assinaturas-container,.assinatura-info').forEach((node) => node.classList.add('pdf-keep-together'));
     return source;
@@ -319,6 +328,70 @@ async function enviarPDF(pdfBlob, uuid, nome) {
     }
 }
 
+// Render one A4 page at a time: long canvases can become white on mobile browsers.
+function canvasTemConteudo(canvasPage) {
+    const data = canvasPage.getContext('2d').getImageData(0, 0, canvasPage.width, canvasPage.height).data;
+    let ink = 0;
+    for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] > 0 && Math.min(data[i], data[i + 1], data[i + 2]) < 235 && ++ink > 32) return true;
+    }
+    return false;
+}
+
+async function renderizarPDFPaginado(source, options, onProgress) {
+    let worker = html2pdf().set(Object.assign({}, options, {enableLinks: false})).from(source);
+    let overlay;
+    let rendered;
+    let pdf;
+    try {
+        // Chain from the completed worker so its container/page-break layout is reused.
+        worker = worker.toContainer();
+        const container = await worker.get('container');
+        overlay = await worker.get('overlay');
+        container.style.margin = '0';
+        container.style.right = 'auto';
+        overlay.style.position = 'absolute';
+        const pageSize = await worker.get('pageSize');
+        const width = Math.ceil(container.getBoundingClientRect().width);
+        const pageHeight = pageSize.inner.px.height;
+        const height = Math.ceil(container.scrollHeight);
+        const pages = Math.ceil(height / pageHeight);
+        if (!width || !height || pages > 100) throw new Error('Dimensões do contrato inválidas.');
+        for (let page = 0; page < pages; page++) {
+            if (onProgress) onProgress(page + 1, pages);
+            if (!document.body.contains(overlay)) document.body.appendChild(overlay);
+            const sliceHeight = Math.min(pageHeight, height - page * pageHeight);
+            worker = worker.set({html2canvas: Object.assign({}, options.html2canvas, {
+                width: width, height: sliceHeight, x: 0, y: page * pageHeight,
+                scrollX: 0, scrollY: 0, windowWidth: Math.max(800, width),
+                windowHeight: pageHeight
+            })}).toCanvas();
+            rendered = await worker.get('canvas');
+            if (!canvasTemConteudo(rendered)) {
+                if (page === pages - 1 && sliceHeight < 32 && pdf) break;
+                throw new Error('A página ' + (page + 1) + ' ficou em branco. O contrato não foi enviado. Tente novamente.');
+            }
+            if (!pdf) {
+                worker = worker.toPdf();
+                pdf = await worker.get('pdf');
+            } else {
+                pdf.addPage();
+                pdf.addImage(rendered.toDataURL('image/jpeg', options.image.quality), 'JPEG',
+                    options.margin[1], options.margin[0], pageSize.inner.width,
+                    Math.min(pageSize.inner.height, rendered.height * pageSize.inner.width / rendered.width));
+            }
+            rendered.width = 1; rendered.height = 1;
+            rendered = null;
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+        if (!pdf) throw new Error('Nenhuma página válida foi gerada.');
+        return pdf.output('blob');
+    } finally {
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        if (rendered) { rendered.width = 1; rendered.height = 1; }
+    }
+}
+
 async function gerarPDF() {
     const uuid = userData('uuid');
     const nome = userData('nome');
@@ -338,7 +411,7 @@ async function gerarPDF() {
             filename: `${uuid}.pdf`,
             image: {type: 'jpeg', quality: isIOS ? 0.86 : 0.91},
             html2canvas: {
-                scale: isIOS ? 1.15 : 1.45,
+                scale: isIOS ? 1 : 1.25,
                 useCORS: true,
                 allowTaint: false,
                 backgroundColor: '#ffffff',
@@ -350,7 +423,9 @@ async function gerarPDF() {
                 avoid: ['.pdf-keep-together', '.texto-contrato p', '.texto-contrato li', '.assinaturas-container', '.assinatura-info'],
             },
         };
-        const pdfBlob = await html2pdf().set(options).from(source).outputPdf('blob');
+        const pdfBlob = await renderizarPDFPaginado(source, options, (page, pages) => {
+            setProgress('Preparando página ' + page + ' de ' + pages + '...', 'Mantenha esta página aberta.', true);
+        });
         if (!pdfBlob || pdfBlob.size < 1000) throw new Error('O PDF gerado ficou vazio.');
         registrarEvento('pdf_ready', String(pdfBlob.size));
         setProgress('Enviando o contrato...', 'Mantenha esta página aberta até a confirmação.', true);

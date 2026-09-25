@@ -87,6 +87,11 @@ if ($signature !== '%PDF-') {
     contratos_upload_response(415, 'error', 'O arquivo recebido não é um PDF válido.');
 }
 
+require_once __DIR__ . '/functions/pdf_render_validation.php';
+if (contratos_pdf_is_blank($file['tmp_name'])) {
+    contratos_upload_log('blank_pdf_rejected', array('uuid' => $uuid, 'size' => $size));
+    contratos_upload_response(422, 'error', 'O PDF recebido contém somente páginas em branco. Atualize a página do contrato e tente assinar novamente.');
+}
 $baseDir = defined('CONTRATOS_DIR') ? rtrim(CONTRATOS_DIR, '/\\') : '/opt/mk-auth/admin/arquivos';
 $clientDir = $baseDir . DIRECTORY_SEPARATOR . $uuid;
 if (!is_dir($clientDir) && !@mkdir($clientDir, 0777, true)) {
@@ -102,6 +107,14 @@ if (!@move_uploaded_file($file['tmp_name'], $temporary)) {
 }
 @chmod($temporary, 0664);
 
+if (is_file($target)) {
+    $archive = $clientDir . '/.contratos-anteriores';
+    if ((!is_dir($archive) && !@mkdir($archive, 0770, true)) ||
+        !@copy($target, $archive . '/' . date('Ymd-His') . '-' . $requestId . '.pdf')) {
+        @unlink($temporary);
+        contratos_upload_response(500, 'error', 'Não foi possível preservar o documento anterior. Tente novamente.');
+    }
+}
 if ((int) @filesize($temporary) !== $size || !@rename($temporary, $target)) {
     @unlink($temporary);
     contratos_upload_log('atomic_save_failed', array('uuid' => $uuid, 'size' => $size));

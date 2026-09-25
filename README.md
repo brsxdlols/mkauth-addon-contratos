@@ -11,7 +11,7 @@ Instalador automatizado do addon de assinatura e controle de contratos para MK A
 - valida PNG, JPG, WEBP e GIF de até 5 MB e salva a imagem em `/opt/mk-auth/mkfiles/assinatura_provedor`, sem extensão;
 - converte automaticamente a assinatura para PNG com fundo branco e traços pretos, neutralizando fundos coloridos, papel fotografado e transparência;
 - versiona automaticamente o CSS e o JavaScript para impedir layouts antigos armazenados no cache do navegador;
-- gera o PDF com paginação protegida, sem cortar parágrafos ou separar o bloco de assinaturas;
+- gera o PDF com paginação protegida, sem cortar parágrafos ou separar o bloco de assinaturas; mantém a selfie junto ao registro de acesso;
 - inclui o gerador de PDF no próprio addon, sem depender de CDN durante a assinatura;
 - oferece fluxo mais leve para iPhone, alternativa de selfie por câmera/arquivo e confirmação real do upload;
 - registra diagnóstico por etapa em `addons/contratos/logs`, facilitando localizar falhas em celulares;
@@ -33,7 +33,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.4.1`.
+O instalador remoto usa por padrão a versão estável `v1.4.2`.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 
@@ -117,3 +117,9 @@ O card Todos inclui todos os clientes ativos. Sem contrato identifica quem não 
 O upload exige sessão administrativa e token CSRF, valida o tipo real do arquivo, registra operador, origem e datas e recusa substituir documentos existentes. Aceita contratos externos independentemente do modelo cadastrado. A data original é obrigatória; sem data de vencimento, exibe Anexado e não presume prazo. Anexos com vencimento participam dos cards de vigência. Os anexos também aparecem no backup de documentos.
 
 Não cria assinatura digital nem altera o cadastro do cliente. Documentos e metadados são preservados nas atualizações, em admin/arquivos e sis_contrato_anexo. Inclua ambos no backup do servidor. O botão Renovar permanece destinado ao fluxo de contratos digitais do addon.
+
+## PDF em celulares e confirmação de exclusão — v1.4.2
+
+Renderiza uma página A4 por vez, limitando o tamanho do canvas e verificando conteúdo antes do envio. O servidor também recusa PDFs do gerador cujas imagens JPEG sejam inteiramente brancas. A verificação não constitui validação do texto ou da assinatura.
+
+A exclusão exige sessão administrativa, confirmação em formulário e token CSRF. O arquivo é movido para .contratos-excluidos na pasta do cliente, preservando o original. Reenvios preservam o PDF anterior em .contratos-anteriores. A atualização não recria PDFs brancos já recebidos; estes precisam de nova assinatura. Modelos no banco continuam preservados.
