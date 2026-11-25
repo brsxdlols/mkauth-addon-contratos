@@ -10,6 +10,7 @@ done
 if command -v php >/dev/null 2>&1; then
     php "$REPOSITORY_DIR/scripts/test-attachments.php"
     php "$REPOSITORY_DIR/scripts/test-pdf-blank.php"
+    php "$REPOSITORY_DIR/scripts/test-native-contract.php" "$REPOSITORY_DIR/addons/contratos/functions/native_contract_renderer.php"
     find "$REPOSITORY_DIR/addons/contratos" "$REPOSITORY_DIR/installers" \
         -type f -name '*.php' -exec php -l {} \; >/dev/null
 fi
@@ -58,3 +59,4 @@ grep -q "contratos-renovacao-refresh" "$REPOSITORY_DIR/addons/contratos/renovaca
 [ -s "$REPOSITORY_DIR/addons/contratos/vendor/html2pdf.bundle.min.js" ]
 
 echo "Validacao concluida com sucesso."
+

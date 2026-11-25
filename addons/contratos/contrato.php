@@ -1,13 +1,24 @@
 <?php
     // pega dados do contrato
     require 'functions/dados_contrato.php';
-    
     // Use the server timezone, not an implicit Manaus/browser timezone.
     $serverTimezone = trim((string) @file_get_contents('/etc/timezone'));
     if (!in_array($serverTimezone, DateTimeZone::listIdentifiers(), true)) {
         $serverTimezone = date_default_timezone_get();
     }
     date_default_timezone_set($serverTimezone);
+
+    require_once __DIR__ . '/functions/native_contract_renderer.php';
+    try {
+        $texto_contrato = mka_native_contract_render($conecta, $login, $texto_contrato);
+    } catch (Throwable $error) {
+        http_response_code(422);
+        echo '<meta charset="utf-8"><p>Não foi possível preparar o contrato. '.htmlspecialchars($error->getMessage(), ENT_QUOTES, 'UTF-8').'</p>';
+        exit;
+    }
+
+    
+
 
     // Cria uma nova instância de DateTime e configura a localização
     $dataHora = new DateTime();
@@ -35,61 +46,6 @@
         <img src="../../../mkfiles/logo.jpg?v=123" alt="Logo da Empresa">
     </div>
 
-    <?php 
-        // Dados reais
-        $dados = [
-            'provedorcnpj' => $cnpj_prov,
-            'provedorendereco' => $endereco_prov,
-            'provedorbairro' => $bairro_prov,
-            'provedorcidade' => $cidade_prov,
-            'provedorcep' => $cep_provedor,
-            'provedorestado' => $estado_prov,
-            'nomecliente' => $nome,
-            'cpfcliente' => $cpf_cnpj,
-            'dataexpedicao' => $expedicao_rg,
-            'nascimento' => $nascimento,
-            'enderecorescliente' => $endereco,
-            'numerorescliente' => $numero,
-            'bairrorescliente' => $bairro,
-            'cidaderescliente' => $cidade,
-            'estadorescliente' => $estado,
-            'diavencimento' => $vencimento,
-            'planodeacesso' => $plano,
-            'velocidadeplano' => $vel_plano,
-            'adesao' => $adesao,
-            'valor' => $valor_plano,
-            'equipamento' => $equipamento,
-            'provedorsite' => $site_prov,
-            'provedorfone' => $fone_prov,
-            'provedoremail' => $email_prov,
-            'rgcliente' => $rgcliente,
-            'fonecliente' => $fonecliente,
-            'emailcliente' => $emailcliente,
-            'complrescliente' => $complrescliente,
-            'bairrocliente' => $bairro,
-            'estadocliente' => $estado,
-            'cepcliente' => $cep,
-            'celularcliente' => $celular_prov,
-            'celular2cliente' => $celular2cliente,
-            'responsavel' => $responsavel,
-            'logincliente' => $login,
-            'termo' => $termo,
-            'datacadastro' => $cadastro,
-            'data' => date('d/m/Y'),
-            'provedornome' => $nome_prov,
-        ];      
-
-        function substituirVariaveis($texto, $dados) {
-            foreach ($dados as $chave => $valor) {
-                $texto = str_replace("%$chave%", $valor, $texto);
-            }
-            return $texto;
-        }
-
-        // Executar a substituição
-        $texto_contrato = substituirVariaveis($texto_contrato, $dados);
-    ?>
-    
     <div class="texto-contrato"><?= preg_replace('/<meta[^>]*>/i', '', $texto_contrato) ?></div>
 
     <div class="assinaturas-container">

@@ -123,3 +123,14 @@ Não cria assinatura digital nem altera o cadastro do cliente. Documentos e meta
 Renderiza uma página A4 por vez, limitando o tamanho do canvas e verificando conteúdo antes do envio. O servidor também recusa PDFs do gerador cujas imagens JPEG sejam inteiramente brancas. A verificação não constitui validação do texto ou da assinatura.
 
 A exclusão exige sessão administrativa, confirmação em formulário e token CSRF. O arquivo selecionado é apagado definitivamente após confirmação. Históricos criados por versões anteriores não são removidos automaticamente. Reenvios preservam o PDF anterior em .contratos-anteriores. A atualização não recria PDFs brancos já recebidos; estes precisam de nova assinatura. Modelos no banco continuam preservados.
+
+
+## Variáveis nativas e produtos no contrato
+
+A montagem para assinatura usa o mecanismo `MKAC_VARS` do MK-Auth para as variáveis do modelo, em vez de manter uma lista parcial no addon. `%produtos%` inclui a tabela de produtos vinculados ao cliente, com suas quantidades; `%servicos%` inclui os serviços e seus valores. A variável opcional `%equipamentos%` continua disponível quando o respectivo módulo está instalado. Modelos não precisam ser recriados.
+
+O renderizador é somente de leitura: não altera estoque, cadastro, modelo, seleção nativa de impressão ou PDFs já assinados. Uma variável desconhecida pelo próprio MK-Auth ou uma versão incompatível do mecanismo apresenta um erro antes de disponibilizar a assinatura, evitando um documento incompleto. Documentos anteriores não são reconstruídos automaticamente.
+
+O arquivo `functions/native_contract_renderer.php` também é distribuído, com conteúdo idêntico, no repositório `brsxdlols/mkauth-dashboard-busca-suite`, em `addons/shared/native_contract_renderer.php`. Atualizações desse componente devem ser publicadas nos dois repositórios. Cada addon funciona de forma independente.
+
+Teste isolado, sem banco ou credenciais: `php scripts/test-native-contract.php addons/contratos/functions/native_contract_renderer.php`. A Busca Inteligente oferece separadamente a prévia do modelo atual e o acesso ao documento assinado.
