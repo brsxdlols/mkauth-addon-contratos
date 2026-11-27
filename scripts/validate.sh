@@ -23,6 +23,10 @@ do
     grep -q '%nomecliente%' "$model"
     grep -q '%cpfcliente%' "$model"
     grep -q '%provedorcidade%' "$model"
+    grep -q 'Razão Social: %provedornome%' "$model"
+    grep -q 'CNPJ: %provedorcnpj%' "$model"
+    grep -q 'Produtos: <strong>%produtos%</strong>' "$model"
+    ! grep -q 'Razão Social: %provedorcnpj%' "$model"
 done
 
 grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$REPOSITORY_DIR/installers/update-addon-js.php"
