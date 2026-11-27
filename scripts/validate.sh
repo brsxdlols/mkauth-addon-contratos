@@ -27,7 +27,7 @@ done
 
 grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$REPOSITORY_DIR/installers/update-addon-js.php"
 grep -q 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO' \
-    "$REPOSITORY_DIR/installers/seed-contracts.php"
+    "$REPOSITORY_DIR/installers/seed-contracts-lib.php"
 grep -q "/opt/mk-auth/mkfiles" \
     "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
 grep -q "assinatura_provedor" \
@@ -48,7 +48,7 @@ grep -q "normalizarAssinaturaProvedor" \
     "$REPOSITORY_DIR/addons/contratos/upload_assinatura_provedor.php"
 grep -q "imagepng" \
     "$REPOSITORY_DIR/addons/contratos/functions/normalizar_assinatura.php"
-grep -q "v1.4.3" "$REPOSITORY_DIR/installers/github-install.sh"
+grep -q "stable-ref" "$REPOSITORY_DIR/installers/github-install.sh"
 grep -q "pdf-keep-together" "$REPOSITORY_DIR/addons/contratos/js/contrato.js"
 grep -q "registrar_evento.php" "$REPOSITORY_DIR/addons/contratos/js/contrato.js"
 grep -q "sis_contrato_historico" "$REPOSITORY_DIR/addons/contratos/functions/contract_history.php"
@@ -59,4 +59,5 @@ grep -q "contratos-renovacao-refresh" "$REPOSITORY_DIR/addons/contratos/renovaca
 [ -s "$REPOSITORY_DIR/addons/contratos/vendor/html2pdf.bundle.min.js" ]
 
 echo "Validacao concluida com sucesso."
+
 

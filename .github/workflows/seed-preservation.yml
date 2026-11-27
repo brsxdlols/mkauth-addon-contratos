@@ -1,0 +1,33 @@
+name: Contract seed preservation
+on:
+  push:
+    paths:
+      - 'installers/**'
+      - 'scripts/**'
+      - 'addons/contratos/database/conexao.php'
+      - '.github/workflows/seed-preservation.yml'
+  pull_request:
+jobs:
+  preserve:
+    runs-on: ubuntu-22.04
+    services:
+      mariadb:
+        image: mariadb:10.5
+        env:
+          MARIADB_ROOT_PASSWORD: fixture-only-password
+          MARIADB_ROOT_HOST: '%'
+        ports:
+          - 33306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h127.0.0.1 -pfixture-only-password"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y php-cli php-mysql php-gd
+      - run: sh scripts/validate.sh
+      - run: php scripts/test-seed-preservation.php installers/seed-contracts-lib.php addons/contratos
+        env:
+          TEST_SQL_HOST: 127.0.0.1
+          TEST_SQL_USER: root
+          TEST_SQL_PASSWORD: fixture-only-password
+          TEST_SQL_PORT: '33306'

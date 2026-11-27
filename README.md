@@ -19,11 +19,11 @@ Instalador automatizado do addon de assinatura e controle de contratos para MK A
 - permite renovar a vigência pelo próprio addon, com histórico preservado no banco;
 - mantém até 20 backups das assinaturas anteriores em `/var/backups/mkauth-addon-contratos-assinaturas`;
 - preserva todos os modelos existentes, inclusive os dois modelos iniciais já personalizados;
-- não cria, atualiza nem exclui registros de contratos na instalação ou no rollback;
+- nunca atualiza nem exclui modelos existentes, documentos, assinaturas ou historico;
 - cria backup dos arquivos e do menu antes de atualizar;
 - preserva configuração local, conexão com o banco e logs do addon.
 
-O instalador completo instala ou atualiza o addon sem executar o script de modelos. Em instalações novas, os modelos devem ser cadastrados pelo administrador no MK Auth. PDFs, anexos, assinaturas e histórico existentes permanecem no servidor.
+O instalador completo instala ou atualiza o codigo e provisiona os dois modelos somente em uma instalacao nova e identificada. Modelos existentes, mesmo editados ou inativos, permanecem intactos. O historico de provisionamento impede recriar um modelo removido. Se uma instalacao antiga possui modelos sem identificadores reconheciveis, nenhum modelo e recriado por suposicao. PDFs, anexos, assinaturas e historico permanecem intactos.
 
 ## Instalação via GitHub
 
@@ -33,7 +33,7 @@ Execute como `root` no servidor MK Auth:
 curl -fsSL https://raw.githubusercontent.com/brsxdlols/mkauth-addon-contratos/main/installers/github-install.sh | sh
 ```
 
-O instalador remoto usa por padrão a versão estável `v1.4.3`.
+O instalador remoto resolve `installers/stable-ref` para o commit estavel publicado. A dashboard chama esse mesmo instalador, sem manter uma copia diferente do addon.
 
 Para testar diretamente o conteúdo mais recente da branch `main`:
 
@@ -60,7 +60,7 @@ sh installers/install.sh
 
 ## Atualização
 
-O comando de instalação é idempotente e pode ser executado novamente. Ele atualiza os arquivos e consolida o menu, sem alterar modelos ou registros de contratos.
+O comando de instalação é idempotente e pode ser executado novamente. Ele atualiza o codigo e consolida o menu. O provisionamento e somente de insercao inicial: nao sobrescreve texto, nome, atividade ou padrao de modelos existentes.
 
 ## Backup e rollback
 
@@ -73,7 +73,7 @@ Cada execução mostra o caminho do backup criado, por exemplo:
 Para restaurar:
 
 ```sh
-sh installers/rollback.sh /root/backups/mkauth-addon-contratos-20260728-220000-v1.1.0
+sh installers/rollback.sh /root/backups/mkauth-addon-contratos-DATA-HORA-vVERSAO-PID
 ```
 
 No checkout não estando mais disponível, baixe o script da mesma versão antes de executar o rollback.
@@ -134,3 +134,12 @@ O renderizador é somente de leitura: não altera estoque, cadastro, modelo, sel
 O arquivo `functions/native_contract_renderer.php` também é distribuído, com conteúdo idêntico, no repositório `brsxdlols/mkauth-dashboard-busca-suite`, em `addons/shared/native_contract_renderer.php`. Atualizações desse componente devem ser publicadas nos dois repositórios. Cada addon funciona de forma independente.
 
 Teste isolado, sem banco ou credenciais: `php scripts/test-native-contract.php addons/contratos/functions/native_contract_renderer.php`. A Busca Inteligente oferece separadamente a prévia do modelo atual e o acesso ao documento assinado.
+
+
+## v1.5.0 — instalacao unificada e preservacao
+
+Use somente o comando completo acima; nao e necessario baixar e executar `seed-contracts.php` separadamente. O antigo utilitario foi alterado para nao sobrescrever modelos. O historico `addon_contratos_model_seed` e mantido fora dos arquivos substituidos e o rollback de codigo nao restaura nem apaga esse historico ou documentos.
+
+A atualizacao preserva tambem arquivos locais nao pertencentes ao pacote, inclusive uploads dentro da pasta do addon. A previa da dashboard prefere o renderizador oficial instalado; uma atualizacao do addon passa a valer para a previa sem duplicar o mecanismo. As variaveis se aplicam a novas geracoes, sem reconstruir PDFs anteriores.
+
+Teste de preservacao em banco isolado: `php scripts/test-seed-preservation.php installers/seed-contracts-lib.php addons/contratos`. Exige um servidor SQL de testes configurado por `TEST_SQL_HOST`, `TEST_SQL_USER`, `TEST_SQL_PASSWORD` e `TEST_SQL_PORT`; cria e remove somente uma base aleatoria com prefixo `suite_contract_test_`.

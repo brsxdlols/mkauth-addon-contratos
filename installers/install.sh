@@ -41,7 +41,9 @@ restore_on_error() {
             mv "$TARGET_DIR" "$failed_dir" 2>/dev/null || true
         fi
 
-        if [ -d "$BACKUP_DIR/addon" ]; then
+        if [ -e "$BACKUP_DIR/previous-live-addon" ]; then
+            mv "$BACKUP_DIR/previous-live-addon" "$TARGET_DIR" 2>/dev/null || true
+        elif [ -d "$BACKUP_DIR/addon" ]; then
             mv "$BACKUP_DIR/addon" "$TARGET_DIR" 2>/dev/null || true
         fi
 
@@ -88,6 +90,7 @@ php -l "$SCRIPT_DIR/update-addon-js.php" >/dev/null
 
 log "criando backup em $BACKUP_DIR"
 mkdir -p "$BACKUP_DIR"
+chmod 0700 "$BACKUP_DIR"
 printf '%s\n' "$ADDON_JS" > "$BACKUP_DIR/addon-js-path"
 printf '%s\n' "$VERSION" > "$BACKUP_DIR/version"
 
@@ -107,6 +110,14 @@ log "preparando arquivos do addon"
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR"
 cp -a "$SOURCE_DIR/." "$STAGE_DIR/"
+find "$STAGE_DIR" -type f -iname 'desktop.ini' -delete
+find "$STAGE_DIR" -type d -exec chmod 0755 {} \;
+find "$STAGE_DIR" -type f -exec chmod 0644 {} \;
+find "$STAGE_DIR" -type f -name '*.sh' -exec chmod 0755 {} \;
+chown -R www-data:www-data "$STAGE_DIR"
+
+# Keep local uploads and other unmanaged assets inside the addon as well.
+if [ -d "$TARGET_DIR" ]; then cp -an "$TARGET_DIR/." "$STAGE_DIR/"; fi
 # Preserve local paths, database configuration and diagnostic history on upgrades.
 for local_file in config.php database/conexao.php modelo_contrato_padrao.html modelo_contrato_fidelidade.html; do
     if [ -f "$TARGET_DIR/$local_file" ]; then
@@ -116,16 +127,13 @@ done
 if [ -d "$TARGET_DIR/logs" ]; then
     cp -a "$TARGET_DIR/logs" "$STAGE_DIR/"
 fi
-find "$STAGE_DIR" -type f -iname 'desktop.ini' -delete
-find "$STAGE_DIR" -type d -exec chmod 0755 {} \;
-find "$STAGE_DIR" -type f -exec chmod 0644 {} \;
-find "$STAGE_DIR" -type f -name '*.sh' -exec chmod 0755 {} \;
-chown -R www-data:www-data "$STAGE_DIR"
 
-MUTATED=1
 if [ -d "$TARGET_DIR" ]; then
-    rm -rf "$TARGET_DIR"
+    mv "$TARGET_DIR" "$BACKUP_DIR/previous-live-addon"
+    MUTATED=1
+    cp -an "$BACKUP_DIR/previous-live-addon/." "$STAGE_DIR/"
 fi
+MUTATED=1
 mv "$STAGE_DIR" "$TARGET_DIR"
 
 log "registrando menu no addon.js"
@@ -133,7 +141,7 @@ php "$SCRIPT_DIR/update-addon-js.php" "$ADDON_JS"
 chown www-data:www-data "$ADDON_JS"
 chmod 0644 "$ADDON_JS"
 
-log "modelos existentes preservados: nenhuma escrita no banco durante a instalacao"
+log "modelos e documentos existentes preservados; provisionamento inicial somente quando seguro"
 
 log "ajustando diretorios de PDFs e da assinatura"
 mkdir -p "$STORAGE_DIR"
@@ -158,6 +166,7 @@ grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$ADDON_JS" || fail "atalho do menu nao fo
 [ -w "$SIGNATURE_BACKUP_DIR" ] || fail "diretorio de backup da assinatura sem permissao de escrita"
 
 ln -sfn "$BACKUP_DIR" "$BACKUP_ROOT/mkauth-addon-contratos-latest"
+php "$SCRIPT_DIR/seed-contracts.php" "$TARGET_DIR"
 SUCCESS=1
 
 log "instalacao concluida com sucesso"
@@ -165,3 +174,4 @@ log "addon: $TARGET_DIR"
 log "menu: $ADDON_JS"
 log "backup: $BACKUP_DIR"
 log "acesso: /admin/addons/contratos/"
+
