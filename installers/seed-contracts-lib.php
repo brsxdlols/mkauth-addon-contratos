@@ -1,6 +1,6 @@
 <?php
 // Insert-only provisioning. Existing models and signed documents are never updated.
-function contratos_seed_models($db,$addonDir){
+function contratos_seed_models($db,$addonDir,$firstInstall=false){
  $db->set_charset('utf8');
  $models=array(
   array('code'=>'addoncontrato_fidelidade_1ano','name'=>'CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE INTERNET COM FIDELIDADE DE 1 ANO','file'=>'modelo_contrato_fidelidade.html'),
@@ -9,9 +9,10 @@ function contratos_seed_models($db,$addonDir){
  if((int)$db->query("SELECT GET_LOCK(CONCAT('addon-contratos-',DATABASE()),15)")->fetch_row()[0]!==1)throw new RuntimeException('Outro instalador esta provisionando os modelos.');
  try{
   $db->query("CREATE TABLE IF NOT EXISTS addon_contratos_model_seed (codigo VARCHAR(100) NOT NULL PRIMARY KEY, estado VARCHAR(24) NOT NULL, modelo_id INT NULL, registrado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB");
-  $empty=(int)$db->query('SELECT COUNT(*) FROM sis_contrato')->fetch_row()[0]===0;
   $newHistory=(int)$db->query('SELECT COUNT(*) FROM addon_contratos_model_seed')->fetch_row()[0]===0;
-  if($empty&&$newHistory){$pending=$db->prepare("INSERT INTO addon_contratos_model_seed(codigo,estado) VALUES(?,'pending')");foreach($models as$model){$pending->bind_param('s',$model['code']);$pending->execute();}$pending->close();}
+  // A fresh addon may coexist with unrelated native models. Known seed identifiers mean prior provisioning.
+  $recognized=0;$probe=$db->prepare('SELECT 1 FROM sis_contrato WHERE codigo=? OR nome=? LIMIT 1');foreach($models as$model){$probe->bind_param('ss',$model['code'],$model['name']);$probe->execute();if($probe->get_result()->num_rows)$recognized++;}$probe->close();
+  if($newHistory&&$firstInstall&&$recognized===0){$pending=$db->prepare("INSERT INTO addon_contratos_model_seed(codigo,estado) VALUES(?,'pending')");foreach($models as$model){$pending->bind_param('s',$model['code']);$pending->execute();}$pending->close();}
   $find=$db->prepare('SELECT id,codigo FROM sis_contrato WHERE codigo=? OR nome=? ORDER BY (codigo=?) DESC,id LIMIT 1');
   $history=$db->prepare('SELECT estado,modelo_id FROM addon_contratos_model_seed WHERE codigo=?');
   $record=$db->prepare('INSERT INTO addon_contratos_model_seed(codigo,estado,modelo_id) VALUES(?,?,?) ON DUPLICATE KEY UPDATE estado=VALUES(estado),modelo_id=VALUES(modelo_id)');

@@ -11,5 +11,5 @@ try{
  // Reuse the provider's existing connection; do not add credentials here.
  ob_start();require $addonDir.'/database/conexao.php';ob_end_clean();
  if(!isset($conecta)||!($conecta instanceof mysqli))throw new RuntimeException('Conexao local do addon indisponivel.');
- contratos_seed_models($conecta,$addonDir);$seedDone=true;
+ contratos_seed_models($conecta,$addonDir,in_array('--first-install',$argv,true));$seedDone=true;
 }catch(Throwable $error){if(ob_get_level())ob_end_clean();fwrite(STDERR,'[contratos] Falha no provisionamento: '.$error->getMessage().PHP_EOL);exit(1);}

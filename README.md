@@ -136,10 +136,12 @@ O arquivo `functions/native_contract_renderer.php` também é distribuído, com 
 Teste isolado, sem banco ou credenciais: `php scripts/test-native-contract.php addons/contratos/functions/native_contract_renderer.php`. A Busca Inteligente oferece separadamente a prévia do modelo atual e o acesso ao documento assinado.
 
 
-## v1.5.0 — instalacao unificada e preservacao
+## v1.5.1 — instalacao unificada e preservacao
 
 Use somente o comando completo acima; nao e necessario baixar e executar `seed-contracts.php` separadamente. O antigo utilitario foi alterado para nao sobrescrever modelos. O historico `addon_contratos_model_seed` e mantido fora dos arquivos substituidos e o rollback de codigo nao restaura nem apaga esse historico ou documentos.
 
 A atualizacao preserva tambem arquivos locais nao pertencentes ao pacote, inclusive uploads dentro da pasta do addon. A previa da dashboard prefere o renderizador oficial instalado; uma atualizacao do addon passa a valer para a previa sem duplicar o mecanismo. As variaveis se aplicam a novas geracoes, sem reconstruir PDFs anteriores.
 
 Teste de preservacao em banco isolado: `php scripts/test-seed-preservation.php installers/seed-contracts-lib.php addons/contratos`. Exige um servidor SQL de testes configurado por `TEST_SQL_HOST`, `TEST_SQL_USER`, `TEST_SQL_PASSWORD` e `TEST_SQL_PORT`; cria e remove somente uma base aleatoria com prefixo `suite_contract_test_`.
+
+A primeira instalacao do addon tambem pode acrescentar os dois modelos quando a base ja tem modelos nativos diferentes. Esses modelos e o padrao escolhido pelo provedor ficam intactos. Identificadores conhecidos ou um historico anterior impedem tratar uma reinstalacao como primeira instalacao.

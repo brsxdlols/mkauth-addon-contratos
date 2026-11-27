@@ -166,7 +166,11 @@ grep -q 'MKAUTH-CONTRATOS-MENU-BEGIN' "$ADDON_JS" || fail "atalho do menu nao fo
 [ -w "$SIGNATURE_BACKUP_DIR" ] || fail "diretorio de backup da assinatura sem permissao de escrita"
 
 ln -sfn "$BACKUP_DIR" "$BACKUP_ROOT/mkauth-addon-contratos-latest"
-php "$SCRIPT_DIR/seed-contracts.php" "$TARGET_DIR"
+if [ "$(cat "$BACKUP_DIR/addon-existed")" = "no" ]; then
+    php "$SCRIPT_DIR/seed-contracts.php" "$TARGET_DIR" --first-install
+else
+    php "$SCRIPT_DIR/seed-contracts.php" "$TARGET_DIR"
+fi
 SUCCESS=1
 
 log "instalacao concluida com sucesso"
